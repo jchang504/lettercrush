@@ -12,6 +12,7 @@ function Node() {
   var right = null;
   var next = null;
 
+  // privileged methods
   this.addWords = function(words) {
     if (words.length <= 2) {
       for (var i = 0; i < words.length; i++) {

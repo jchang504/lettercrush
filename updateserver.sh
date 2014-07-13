@@ -1,3 +1,3 @@
 #!/bin/bash
 
-sudo cp TST.js LV.js /var/www/html
+sudo cp LV.js Game.js TST.js /var/www/html
