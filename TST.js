@@ -63,6 +63,38 @@ function Node() {
     }
   }
 
+  /* Lookup
+   * REQUIRES: word is a string
+   * ENSURES: returns true iff word is contained in the TST rooted at
+   * this node
+   */
+  this.lookup = function(word) {
+    var firstLetter = word.substring(0,1).toLowerCase();
+
+    if (firstLetter === letter) {
+      if (word.length == 1) {
+        return true;
+      }
+      else { // if more letters
+        return next.lookup(word.substring(1));
+      }
+    }
+
+    else if (firstLetter < letter) {
+      if (left === null) {
+        return false;
+      }
+      return left.lookup(word);
+    }
+
+    else { // firstLetter > letter
+      if (right === null) {
+        return false;
+      }
+      return right.lookup(word);
+    }
+  }
+
 }
 
 /* REQUIRES: words is an alphabetically-sorted list of words
