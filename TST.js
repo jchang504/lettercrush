@@ -5,11 +5,6 @@
  * ENSURES: returns a Node
  */
 function Node() {
-  //temp
-  var count = 0;
-  this.getCount = function() {
-    return count;
-  }
   // private variables
   var letter = null;
   var endsWord = null;
@@ -66,9 +61,6 @@ function Node() {
       }
       right.insert(word);
     }
-
-    //temp
-    count++;
   }
 
 }

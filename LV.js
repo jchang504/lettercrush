@@ -13,9 +13,13 @@ function loadDict() {
 }
 
 function main(data) {
-  var start = new Date();
-  var root = buildTST(data.split("\n"));
-  console.log("Trie size: " + String(root.getCount()));
-  var end = new Date();
-  console.log("Time elapsed: " + String(end - start));
+  try {
+    var start = new Date();
+    var root = buildTST(data.split("\n"));
+    var end = new Date();
+    console.log("Time elapsed: " + String(end - start));
+  }
+  catch(e) {
+    console.log(e);
+  }
 }
