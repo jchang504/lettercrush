@@ -40,6 +40,10 @@ function main(data) {
     game.playMove(move1);
     game.printBoard();
     console.log('My turn: ' + String(game.isMyTurn()) + '; Current board value: ' + String(game.valueBoard()));
+    start = new Date();
+    game.findBestMoves(1);
+    end = new Date();
+    console.log('findBestMoves took: ' + String(end - start));
   }
   catch(e) {
     console.log(e);

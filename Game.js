@@ -15,6 +15,7 @@ function Game(aName, aMyTurn, aBoard, aPlayedMoves, aDate) {
   var board = aBoard;
   var playedMoves = aPlayedMoves;
   var date = aDate;
+  var bestMoves = null;
 
   // Getters
   this.isMyTurn = function() {
@@ -41,7 +42,19 @@ function Game(aName, aMyTurn, aBoard, aPlayedMoves, aDate) {
   }
 
   // privileged methods
-  this.findBestMoves = function(timeout) {
+  /* Find and set the bestMoves
+   * REQUIRES: timeLimit is a time limit in seconds (minimum 1)
+   * ENSURES: finds and sets the bestMoves within at most timeLimit seconds
+   */
+  this.findBestMoves = function(timeLimit) {
+    var endTime = new Date().getTime() + 1000*timeLimit;
+    for (var i = 0; i < 1000000; i++) {
+      if (new Date().getTime() >= endTime) {
+        console.log('Timed out.');
+        break;
+      }
+      console.log('Still running');
+    }
   }
 
   /* REQUIRES: move is a bit (number) array of length 25
