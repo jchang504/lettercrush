@@ -43,11 +43,13 @@ function Game(aName, aMyTurn, aBoard, aPlayedMoves, aDate) {
   //temporary
 
   // privileged methods
+
   /* Find and set the bestMoves
    * REQUIRES: timeLimit is a time limit in seconds (minimum 1)
    * ENSURES: finds and sets the bestMoves within at most timeLimit seconds
    */
   this.findBestMoves = function(timeLimit) {
+    /*
     var count = 0;
     var endTime = new Date().getTime() + 1000*timeLimit;
     for (var i = 0; i < 1000000000; i++) {
@@ -58,7 +60,60 @@ function Game(aName, aMyTurn, aBoard, aPlayedMoves, aDate) {
       count++;
     }
     console.log(count);
+    */
+    console.log(makeTileOrder());
   }
+
+  // private helper methods for findBestMoves
+
+  /* Sorts the tiles in the board into vulnerable (light red or white)
+   * and invulnerable lists. Returns a random ordering where all the
+   * vulnerable tiles occur first, then the invulnerables.
+   */
+  function makeTileOrder() {
+    var redAndWhite = [];
+    var blueAndLocked = [];
+    for (var i = 0; i < 25; i++) {
+      var letter = board[i][0];
+      var index = letter.charCodeAt(0) - 97;
+      if (board[i][1] > 0 || board[i][1] == -2) {
+        if (blueAndLocked[index]) { // if this letter has been added
+          blueAndLocked[index][1]++;
+        }
+        else {
+          blueAndLocked[index] = [letter, 1];
+        }
+      }
+      else {
+        if (redAndWhite[index]) {
+          redAndWhite[index][1]++;
+        }
+        else {
+          redAndWhite[index] = [letter, 1];
+        }
+      }
+    }
+    // We only need to eliminate the undefined elements of the array,
+    // so this dummy function will work
+    var dummyFunc = function() { return true; };
+    var first = redAndWhite.filter(dummyFunc);
+    var second = blueAndLocked.filter(dummyFunc);
+    shuffle(first);
+    shuffle(second);
+    return first.concat(second);
+  }
+
+  // Shuffles the tiles in a random order by the KFY shuffle algorithm
+  function shuffle(tiles) {
+    for (var i = tiles.length - 1; i > 0; i--) {
+      var r = Math.floor(Math.random()*(i+1));
+      var temp = tiles[i];
+      tiles[i] = tiles[r];
+      tiles[r] = temp;
+    }
+  }
+
+  // privileged methods
 
   /* REQUIRES: move is a bit (number) array of length 25
    * ENSURES: returns the value of the board after this move

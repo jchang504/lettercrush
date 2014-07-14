@@ -24,11 +24,9 @@ function main(data) {
     console.log('Building dictionary time elapsed: ' + String(end - start));
     var testBoard = []
     for (var i = 0; i < 25; i++) {
-      testBoard.push(['a', 0]);
+      testBoard.push([String.fromCharCode(97+(i%5)), i%2]);
     }
     var game = new Game('test', true, testBoard, ['zyzzyva'], new Date());
-    game.printBoard();
-    console.log('My turn: ' + String(game.isMyTurn()) + '; Current board value: ' + String(game.valueBoard()));
     var move1 = [0,0,0,1,0,
                  0,0,0,0,0,
                  0,1,0,0,0,
@@ -38,14 +36,6 @@ function main(data) {
     var move1Value = game.valueMove(move1);
     end = new Date();
     console.log('move1 value calculation took: ' + String(end - start));
-    game.printBoard();
-    console.log('My turn: ' + String(game.isMyTurn()) + '; Current board value: ' + String(game.valueBoard()));
-    game.playMove(move1);
-    game.printBoard();
-    console.log('My turn: ' + String(game.isMyTurn()) + '; Current board value: ' + String(game.valueBoard()));
-    game.playMove(move1);
-    game.printBoard();
-    console.log('My turn: ' + String(game.isMyTurn()) + '; Current board value: ' + String(game.valueBoard()));
     start = new Date();
     game.findBestMoves(1);
     end = new Date();
