@@ -34,7 +34,13 @@ function main(data) {
                  0,1,0,0,0,
                  0,0,0,1,1,
                  0,0,0,1,1];
-    console.log('move1 value: ' + String(game.valueMove(move1)));
+    start = new Date();
+    var move1Value = game.valueMove(move1);
+    end = new Date();
+    console.log('move1 value calculation took: ' + String(end - start));
+    game.printBoard();
+    console.log('My turn: ' + String(game.isMyTurn()) + '; Current board value: ' + String(game.valueBoard()));
+    game.playMove(move1);
     game.printBoard();
     console.log('My turn: ' + String(game.isMyTurn()) + '; Current board value: ' + String(game.valueBoard()));
     game.playMove(move1);
