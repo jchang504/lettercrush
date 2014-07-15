@@ -22,6 +22,28 @@ function Node() {
   this.getNext = function() {
     return next;
   }
+  this.getLeft = function() {
+    return left;
+  }
+  this.getRight = function() {
+    return right;
+  }
+
+
+  // temp for debugging
+  this.countNodes = function() {
+    var count = 0;
+    if (left != null) {
+      count += left.countNodes();
+    }
+    if (right != null) {
+      count += right.countNodes();
+    }
+    if (next != null) {
+      count += next.countNodes();
+    }
+    return count+1;
+  }
 
   // privileged methods
 

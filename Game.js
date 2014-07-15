@@ -39,7 +39,14 @@ function Game(aName, aMyTurn, aBoard, aPlayedMoves, aDate) {
     for (var r = 0; r < 5; r++) {
       boardString += '[';
       for (var c = 0; c < 5; c++) {
-        boardString += ' ' + String(board[5*r+c][1]);
+        var color = board[5*r+c][1];
+        if (color >= 0) {
+          color = '+' + String(color);
+        }
+        else {
+          color = String(color);
+        }
+        boardString += ' ' + color + board[5*r+c][0];
       }
       boardString += ' ]\n';
     }
@@ -53,7 +60,7 @@ function Game(aName, aMyTurn, aBoard, aPlayedMoves, aDate) {
    * REQUIRES: timeLimit is a time limit in seconds (minimum 1)
    * ENSURES: finds and sets the bestMoves within at most timeLimit seconds
    */
-  this.findBestMoves = function(TST, timeLimit) {
+  this.findBestMoves = function(TSTRoot, timeLimit) {
     /*
     var count = 0;
     var endTime = new Date().getTime() + 1000*timeLimit;
@@ -67,46 +74,85 @@ function Game(aName, aMyTurn, aBoard, aPlayedMoves, aDate) {
     console.log(count);
     */
     // NAIVE ALGORITHM, no lookahead, evaluate as you generate, keep 5
-    bestMoves = [null];
-    bestMovesValue = [BOARD_MIN];
-    var tilesUsed = [];
-    for (var i = 0; i < 25; i++) {
-      tilesUsed[i] = 0;
+    bestMovesLen = 5; // replace with parameter later
+    bestMoves = new Array(bestMovesLen);
+    bestMovesValue = new Array(bestMovesLen);
+    for (var i = 0; i < bestMovesLen; i++) {
+      bestMoves[i] = null;
+      bestMovesValue[i] = BOARD_MIN;
     }
-    var movesList = findMoves(TST, tilesUsed, 1);
+    var alphaPool = mapTileLocations();
+    var move = new Array(25);
+    for (var i = 0; i < 25; i++) {
+      move[i] = -1;
+    }
+    var movesList = findMoves(TSTRoot, alphaPool, move, 0);
     console.log('movesList.length: ' + String(movesList.length));
+    var len = movesList.length;
+    for (var i = 0; i < len; i++) {
+      
+    }
   }
 
   // private helper methods for findBestMoves
 
-  /* REQUIRES: tilesUsed has 0 for all unused tiles, and used tiles
-   * are numbered in order of use. letterNum is one more than the number
-   * of tiles used so far.
+  /* REQUIRES: TSTNode is the desired starting node, alphaPool is a pool
+   * of letters mapped to positions by mapTileLocations, move is the move
+   * constructed so far (represented as a 25-array, initially filled with
+   * -1's), and letterNum is the next index to add a letter position in
+   * move (i.e. the number (position) of the next letter in the
+   * constructed word.
    * ENSURES: Find and returns an array of possible moves
    */
-  function findMoves(TSTNode, tilesUsed, letterNum) {
+  function findMoves(TSTNode, alphaPool, move, letterNum) {
     var moveList = [];
-    for (var i = 0; i < 25; i++) {
-      if (tilesUsed[i] == 0) {
-        var curr = TSTNode.findSibling(board[i][0]);
-        if (curr != null) {
-          // add the letter of curr to the used tiles
-          var newTilesUsed = tilesUsed.slice(0);
-          newTilesUsed[i] = letterNum;
-          var next = curr.getNext();
-          if (next != null) { // if we can continue, add these
-            moveList = findMoves(next, newTilesUsed, letterNum+1);
-            if (curr.isEndsWord()) { // if this is also a word, add it
-              moveList.push(newTilesUsed);
-            }
-          }
-          else { // we can't continue, so this must be a word; add it
-            moveList.push(newTilesUsed);
-          }
-        }
+    // get the index for this node's letter
+    var alphaIndex = TSTNode.getLetter().charCodeAt(0)-97;
+    if (alphaPool[alphaIndex].length > 0) { // if pool contains this letter
+      var alphaPoolCopy = new Array(26); // clone the pool
+      for (var i = 0; i < 26; i++) {
+        alphaPoolCopy[i] = alphaPool[i].slice(0);
+      }
+      var moveCopy = move.slice(0); // clone the move
+      // remove letter from pool, and mark position in move
+      moveCopy[letterNum] = alphaPoolCopy[alphaIndex].pop();
+      var next = TSTNode.getNext();
+      // if next exists, add moves from further down the TST
+      if (next != null) {
+        moveList = findMoves(TSTNode.getNext(), alphaPoolCopy, moveCopy, letterNum+1);
+      }
+      // if this node ends a word, add the (new) move
+      if (TSTNode.isEndsWord()) {
+        moveList.push(moveCopy);
       }
     }
+    // if left exists, add moves from the left node
+    var left = TSTNode.getLeft();
+    if (left != null) {
+      moveList = moveList.concat(findMoves(left, alphaPool, move, letterNum));
+    }
+    // if right exists, add moves from the right node
+    var right = TSTNode.getRight();
+    if (right != null) {
+      moveList = moveList.concat(findMoves(right, alphaPool, move, letterNum));
+    }
+    // finally, return the whole list
     return moveList;
+  }
+
+  /* REQUIRES: true
+   * ENSURES: returns a 26-array representing the alphabet. Each element
+   * is an array of indices of that letter in the board (possibly empty)
+   */
+  function mapTileLocations() {
+    var locs = new Array(26);
+    for (var i = 0; i < 26; i++) {
+      locs[i] = [];
+    }
+    for (var i = 0; i < 25; i++) {
+      locs[board[i][0].charCodeAt(0) - 97].push(i);
+    }
+    return locs;
   }
 
   /* Sorts the tiles in the board into vulnerable (light red or white)
@@ -211,7 +257,7 @@ function Game(aName, aMyTurn, aBoard, aPlayedMoves, aDate) {
 
   // returns a nameless, dateless clone of this Game
   function clone() {
-    var boardClone = [];
+    var boardClone = new Array(25);
     for (var i = 0; i < 25; i++) {
       boardClone[i] = board[i].slice(0);
     }
