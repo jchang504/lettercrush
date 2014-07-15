@@ -12,7 +12,45 @@ function Node() {
   var right = null;
   var next = null;
 
+  // getters
+  this.getLetter = function() {
+    return letter;
+  }
+  this.isEndsWord = function() {
+    return endsWord;
+  }
+  this.getNext = function() {
+    return next;
+  }
+
   // privileged methods
+
+  /* Goes left or right to find the sibling matching the sibLetter, and
+   * returns it. If it can't be found, returns null. May return itself.
+   */
+  this.findSibling = function(sibLetter) {
+    if (sibLetter < letter) {
+      if (left != null) {
+        return left.findSibling();
+      }
+      else { // nothing on the left
+        return null;
+      }
+    }
+    else if (sibLetter > letter) {
+      if (right != null) {
+        return right.findSibling();
+      }
+      else { // nothing on the right
+        return null;
+      }
+    }
+    else { // sibLetter == letter
+      return this;
+    }
+  }
+
+  // Adds an array of words to the TST
   this.addWords = function(words) {
     if (words.length <= 2) {
       for (var i = 0; i < words.length; i++) {
@@ -30,7 +68,7 @@ function Node() {
   }
 
   /* Insert
-   * REQUIRES: letter is a string of length 1
+   * REQUIRES: word is a string
    * ENSURES: inserts the word into the TST
    */
   this.insert = function(word) {
