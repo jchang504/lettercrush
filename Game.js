@@ -11,13 +11,13 @@ BOARD_MIN = -50;
  * been played, and aDate is the current date (a Date object)
  * ENSURES: returns a Game representing these facts
  */
-function Game(aName, aMyTurn, aBoard, aPlayedMoves, aDate) {
+function Game(aName, aMyTurn, aBoard, aPlayedWords, aDate) {
   // public variables
   this.name = aName;
   // private variables
   var myTurn = aMyTurn;
   var board = aBoard;
-  var playedMoves = aPlayedMoves;
+  var playedWords = aPlayedWords;
   var date = aDate;
   var bestMoves = null;
   var bestMoveValues = null;
@@ -29,8 +29,8 @@ function Game(aName, aMyTurn, aBoard, aPlayedMoves, aDate) {
   this.getBoard = function() {
     return board;
   }
-  this.getPlayedMoves = function() {
-    return playedMoves;
+  this.getPlayedWords = function() {
+    return playedWords;
   }
 
   //temporary
@@ -60,7 +60,7 @@ function Game(aName, aMyTurn, aBoard, aPlayedMoves, aDate) {
    * REQUIRES: timeLimit is a time limit in seconds (minimum 1)
    * ENSURES: finds and sets the bestMoves within at most timeLimit seconds
    */
-  this.findBestMoves = function(TSTRoot, timeLimit) {
+  this.findBestMoves = function(TSTRoot, bestMovesLen, timeLimit) {
     /*
     var count = 0;
     var endTime = new Date().getTime() + 1000*timeLimit;
@@ -73,8 +73,7 @@ function Game(aName, aMyTurn, aBoard, aPlayedMoves, aDate) {
     }
     console.log(count);
     */
-    // NAIVE ALGORITHM, no lookahead, evaluate as you generate, keep 5
-    bestMovesLen = 5; // replace with parameter later
+    // NAIVE ALGORITHM, no lookahead, keep 5
     bestMoves = new Array(bestMovesLen);
     bestMovesValue = new Array(bestMovesLen);
     for (var i = 0; i < bestMovesLen; i++) {
@@ -88,10 +87,24 @@ function Game(aName, aMyTurn, aBoard, aPlayedMoves, aDate) {
     }
     var movesList = findMoves(TSTRoot, alphaPool, move, 0);
     console.log('movesList.length: ' + String(movesList.length));
-    var len = movesList.length;
-    for (var i = 0; i < len; i++) {
-      
+    for (var i = 0; i < movesList.length; i++) {
+      var move = movesList[i];
+      var moveValue = this.valueMove(move);
+      var insertIndex = bestMovesLen;
+      for (var j = bestMovesLen-1; j >= 0; j--) {
+        if (moveValue > bestMovesValue[j]) {
+          insertIndex--;
+        }
+        else { // once it's less, break because the rest are higher
+          break;
+        }
+      }
+      if (insertIndex < bestMovesLen && !hasBeenPlayed(convertToWord(move))) {
+        bestMoves[insertIndex] = move;
+        bestMovesValue[insertIndex] = moveValue;
+      }
     }
+    console.log(bestMoves);
   }
 
   // private helper methods for findBestMoves
@@ -154,52 +167,25 @@ function Game(aName, aMyTurn, aBoard, aPlayedMoves, aDate) {
     }
     return locs;
   }
-
-  /* Sorts the tiles in the board into vulnerable (light red or white)
-   * and invulnerable lists. Returns a random ordering where all the
-   * vulnerable tiles occur first, then the invulnerables.
-   */
-  function makeTileOrder() {
-    var redAndWhite = [];
-    var blueAndLocked = [];
-    for (var i = 0; i < 25; i++) {
-      var letter = board[i][0];
-      var index = letter.charCodeAt(0) - 97;
-      if (board[i][1] > 0 || board[i][1] == -2) {
-        if (blueAndLocked[index]) { // if this letter has been added
-          blueAndLocked[index][1]++;
-        }
-        else {
-          blueAndLocked[index] = [letter, 1];
-        }
-      }
-      else {
-        if (redAndWhite[index]) {
-          redAndWhite[index][1]++;
-        }
-        else {
-          redAndWhite[index] = [letter, 1];
-        }
-      }
+  
+  function convertToWord(move) {
+    var word = "";
+    var i = 0;
+    var pos = move[i];
+    while (pos != -1) {
+      word += board[pos][0];
+      pos = move[++i];
     }
-    // We only need to eliminate the undefined elements of the array,
-    // so this dummy function will work
-    var dummyFunc = function() { return true; };
-    var first = redAndWhite.filter(dummyFunc);
-    var second = blueAndLocked.filter(dummyFunc);
-    shuffle(first);
-    shuffle(second);
-    return first.concat(second);
+    return word;
   }
 
-  // Randomly shuffles the tiles IN PLACE by the KFY shuffle algorithm
-  function shuffle(tiles) {
-    for (var i = tiles.length - 1; i > 0; i--) {
-      var r = Math.floor(Math.random()*(i+1));
-      var temp = tiles[i];
-      tiles[i] = tiles[r];
-      tiles[r] = temp;
+  function hasBeenPlayed(word) {
+    for (var i = 0; i < playedWords.length; i++) {
+      if (word == playedWords[i]) {
+        return true;
+      }
     }
+    return false;
   }
 
   // privileged methods
@@ -221,15 +207,21 @@ function Game(aName, aMyTurn, aBoard, aPlayedMoves, aDate) {
     return sum;
   }
 
-  // move is a bit (number) array of length 25
+  /* move is a 25-array, filled from the left with the positions of the
+   * tiles to use in order. The rest are filled with -1.
+   */
   this.playMove = function(move) {
     var color = myTurn ? 1 : -1;
-    for (var i = 0; i < 25; i++) {
-      if (move[i] == 1 && Math.abs(board[i][1]) != 2) {
-        board[i][1] = color;
+    var i = 0;
+    var pos = move[i];
+    while (pos != -1) {
+      if (Math.abs(board[pos][1]) != 2) {
+        board[pos][1] = color;
       }
+      pos = move[++i];
     }
     updateColors();
+    playedWords.push(convertToWord(move));
     myTurn = !myTurn;
   }
 
@@ -261,7 +253,7 @@ function Game(aName, aMyTurn, aBoard, aPlayedMoves, aDate) {
     for (var i = 0; i < 25; i++) {
       boardClone[i] = board[i].slice(0);
     }
-    return new Game(null, myTurn, boardClone, playedMoves.slice(0), null);
+    return new Game(null, myTurn, boardClone, playedWords.slice(0), null);
   }
 
 }
