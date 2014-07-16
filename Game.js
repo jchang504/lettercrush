@@ -3,6 +3,7 @@
 // global constant variable
 BOARD_MAX = 50;
 BOARD_MIN = -50;
+RECOMB_TOP = 5;
 
 /* constructor for a Game
  * REQUIRES: aName is a string, aMyTurn is a boolean, aBoard is a valid
@@ -85,8 +86,12 @@ function Game(aName, aMyTurn, aBoard, aPlayedWords, aDate) {
     for (var i = 0; i < 25; i++) {
       move[i] = -1;
     }
+    var start = new Date();
     var movesList = findMoves(TSTRoot, alphaPool, move, 0);
+    var end = new Date();
     console.log('movesList.length: ' + String(movesList.length));
+    console.log('movesList generation took: ' + String(end-start));
+    start = new Date();
     for (var i = 0; i < movesList.length; i++) {
       var move = movesList[i];
       var moveValue = this.valueMove(move);
@@ -105,6 +110,8 @@ function Game(aName, aMyTurn, aBoard, aPlayedWords, aDate) {
       }
     }
     console.log(bestMoves);
+    end = new Date();
+    console.log('bestMoves selection took: ' + String(end-start));
   }
 
   // private helper methods for findBestMoves
@@ -155,15 +162,31 @@ function Game(aName, aMyTurn, aBoard, aPlayedWords, aDate) {
 
   /* REQUIRES: true
    * ENSURES: returns a 26-array representing the alphabet. Each element
-   * is an array of indices of that letter in the board (possibly empty)
+   * is an array of indices of that letter in the board (possibly empty).
+   * IMPORTANT: considers vulnerability of tiles from myTurn == true
+   * perspective, should ONLY be called from this perspective for accurate
+   * tile ordering.
    */
   function mapTileLocations() {
-    var locs = new Array(26);
+    // one array for vulnerable, one for invulnerable
+    var vuln = new Array(26); 
+    var invuln = new Array(26);
     for (var i = 0; i < 26; i++) {
-      locs[i] = [];
+      vuln[i] = []; 
+      invuln[i] = [];
     }
     for (var i = 0; i < 25; i++) {
-      locs[board[i][0].charCodeAt(0) - 97].push(i);
+      if (board[i][1] > 0 || board[i][1] == -2) {
+        invuln[board[i][0].charCodeAt(0) - 97].push(i);
+      }
+      else {
+        vuln[board[i][0].charCodeAt(0) - 97].push(i);
+      }
+    }
+    // now combine both with vulnerable first
+    var locs = new Array(26);
+    for (var i = 0; i < 26; i++) {
+      locs[i] = vuln[i].concat(invuln[i]);
     }
     return locs;
   }
