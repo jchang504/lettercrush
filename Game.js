@@ -185,8 +185,8 @@ function Game(aName, aMyTurn, aBoard, aPlayedWords, aDate) {
     for (var i = 0; i < 26; i++) {
       // shuffle the vulnerable tiles
       shuffle(vuln[i]);
-      // now combine both with vulnerable first
-      locs[i] = vuln[i].concat(invuln[i]);
+      // now combine both with vulnerable LAST (we pop from end)
+      locs[i] = invuln[i].concat(vuln[i]);
     }
     return locs;
   }
