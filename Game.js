@@ -102,7 +102,7 @@ function Game(aName, aMyTurn, aBoard, aPlayedWords, aDate) {
           break;
         }
       }
-      if (insertIndex < BEST_MOVES_LEN && !hasBeenPlayed(convertToWord(move))) {
+      if (insertIndex < BEST_MOVES_LEN && playedWords.indexOf(convertToWord(move)) == -1) {
         bestMoves[insertIndex] = move;
         bestMovesValue[insertIndex] = moveValue;
       }
@@ -181,16 +181,17 @@ function Game(aName, aMyTurn, aBoard, aPlayedWords, aDate) {
         vuln[board[i][0].charCodeAt(0) - 97].push(i);
       }
     }
-    // now combine both with vulnerable first
     var locs = new Array(26);
     for (var i = 0; i < 26; i++) {
+      // shuffle the vulnerable tiles
       shuffle(vuln[i]);
+      // now combine both with vulnerable first
       locs[i] = vuln[i].concat(invuln[i]);
     }
     return locs;
   }
 
-  // count up the letters in array by letter index
+  // count up the letters in an array indexed by letter
   function unmapToAlpha(move) {
     var alphaSet = new Array(26);
     for (var i = 0; i < 26; i++) {
@@ -225,15 +226,6 @@ function Game(aName, aMyTurn, aBoard, aPlayedWords, aDate) {
       pos = move[++i];
     }
     return word;
-  }
-
-  function hasBeenPlayed(word) {
-    for (var i = 0; i < playedWords.length; i++) {
-      if (word == playedWords[i]) {
-        return true;
-      }
-    }
-    return false;
   }
 
   // privileged methods
