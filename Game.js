@@ -3,7 +3,7 @@
 // global constant variable
 BOARD_MAX = 50;
 BOARD_MIN = -50;
-RECOMB_TOP = 5;
+BEST_MOVES_LEN = 10;
 
 /* constructor for a Game
  * REQUIRES: aName is a string, aMyTurn is a boolean, aBoard is a valid
@@ -61,7 +61,7 @@ function Game(aName, aMyTurn, aBoard, aPlayedWords, aDate) {
    * REQUIRES: timeLimit is a time limit in seconds (minimum 1)
    * ENSURES: finds and sets the bestMoves within at most timeLimit seconds
    */
-  this.findBestMoves = function(TSTRoot, bestMovesLen, timeLimit) {
+  this.findBestMoves = function(TSTRoot, timeLimit) {
     /*
     var count = 0;
     var endTime = new Date().getTime() + 1000*timeLimit;
@@ -75,9 +75,9 @@ function Game(aName, aMyTurn, aBoard, aPlayedWords, aDate) {
     console.log(count);
     */
     // NAIVE ALGORITHM, no lookahead, keep 5
-    bestMoves = new Array(bestMovesLen);
-    bestMovesValue = new Array(bestMovesLen);
-    for (var i = 0; i < bestMovesLen; i++) {
+    bestMoves = new Array(BEST_MOVES_LEN);
+    bestMovesValue = new Array(BEST_MOVES_LEN);
+    for (var i = 0; i < BEST_MOVES_LEN; i++) {
       bestMoves[i] = null;
       bestMovesValue[i] = BOARD_MIN;
     }
@@ -86,17 +86,15 @@ function Game(aName, aMyTurn, aBoard, aPlayedWords, aDate) {
     for (var i = 0; i < 25; i++) {
       move[i] = -1;
     }
-    var start = new Date();
+    // generate moves
     var movesList = findMoves(TSTRoot, alphaPool, move, 0);
-    var end = new Date();
     console.log('movesList.length: ' + String(movesList.length));
-    console.log('movesList generation took: ' + String(end-start));
-    start = new Date();
+    // evaluate and find the top 10
     for (var i = 0; i < movesList.length; i++) {
       var move = movesList[i];
       var moveValue = this.valueMove(move);
-      var insertIndex = bestMovesLen;
-      for (var j = bestMovesLen-1; j >= 0; j--) {
+      var insertIndex = BEST_MOVES_LEN;
+      for (var j = BEST_MOVES_LEN-1; j >= 0; j--) {
         if (moveValue > bestMovesValue[j]) {
           insertIndex--;
         }
@@ -104,14 +102,14 @@ function Game(aName, aMyTurn, aBoard, aPlayedWords, aDate) {
           break;
         }
       }
-      if (insertIndex < bestMovesLen && !hasBeenPlayed(convertToWord(move))) {
+      if (insertIndex < BEST_MOVES_LEN && !hasBeenPlayed(convertToWord(move))) {
         bestMoves[insertIndex] = move;
         bestMovesValue[insertIndex] = moveValue;
       }
     }
-    console.log(bestMoves);
-    end = new Date();
-    console.log('bestMoves selection took: ' + String(end-start));
+    for (var i = 0; i < BEST_MOVES_LEN; i++) {
+      console.log(convertToWord(bestMoves[i]));
+    }
   }
 
   // private helper methods for findBestMoves
@@ -186,10 +184,37 @@ function Game(aName, aMyTurn, aBoard, aPlayedWords, aDate) {
     // now combine both with vulnerable first
     var locs = new Array(26);
     for (var i = 0; i < 26; i++) {
+      shuffle(vuln[i]);
       locs[i] = vuln[i].concat(invuln[i]);
     }
     return locs;
   }
+
+  // count up the letters in array by letter index
+  function unmapToAlpha(move) {
+    var alphaSet = new Array(26);
+    for (var i = 0; i < 26; i++) {
+      alphaSet[i] = 0;
+    }
+    var i = 0;
+    var pos = move[i];
+    while (pos != -1) {
+      alphaSet[board[pos][0].fromCharAt(0) - 97]++;
+      pos = move[++i];
+    }
+    return alphaSet;
+  }
+
+  // Randomly shuffles the tiles IN PLACE by the KFY shuffle algorithm
+  function shuffle(tiles) {
+    for (var i = tiles.length - 1; i > 0; i--) {
+      var r = Math.floor(Math.random()*(i+1));
+      var temp = tiles[i];
+      tiles[i] = tiles[r];
+      tiles[r] = temp;
+    }
+  }
+
   
   function convertToWord(move) {
     var word = "";

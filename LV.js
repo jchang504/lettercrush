@@ -33,7 +33,7 @@ function main(data) {
     }
     var game = new Game('test', true, testBoard, [], new Date());
     start = new Date();
-    game.findBestMoves(root, 5, 30);
+    game.findBestMoves(root, 30);
     end = new Date();
     console.log('findBestMoves took: ' + String(end - start));
   }
