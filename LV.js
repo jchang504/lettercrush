@@ -11,8 +11,8 @@ function loadGame() {
 function loadDict() {
   $('#load-dict').css('display', 'block');
   $.get('dictionary.dat', function(data) { // TST is 607490 nodes
-    main(data);
     $('#done-dict').css('display', 'block');
+    main(data);
   });
 }
 
@@ -32,6 +32,7 @@ function main(data) {
       testBoard[i] = [testLetters[i], 0];
     }
     var game = new Game('test', true, testBoard, [], new Date());
+    game.printBoard();
     start = new Date();
     game.findBestMoves(root, 30);
     end = new Date();

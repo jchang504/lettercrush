@@ -3,7 +3,7 @@
 // global constant variable
 BOARD_MAX = 50;
 BOARD_MIN = -50;
-BEST_MOVES_LEN = 10;
+BEST_MOVES_LEN = 2;
 
 // random helper functions
 
@@ -93,7 +93,13 @@ function Game(aName, aMyTurn, aBoard, aPlayedWords, aDate) {
       bestMovesValue[i] = BOARD_MIN;
     }
     var start = new Date();
-    var movesList = genMoves(TSTRoot);
+    var alphaPool = mapTileLocations();
+    var move = new Array(25);
+    for (var i = 0; i < 25; i++) {
+      move[i] = -1;
+    }
+    // generate moves
+    var moveList = findMoves(TSTRoot, alphaPool, move, 0);
     var end = new Date();
     console.log('movesList.length: ' + String(movesList.length));
     console.log('movesList generation took: ' + String(end - start));
@@ -155,15 +161,15 @@ function Game(aName, aMyTurn, aBoard, aPlayedWords, aDate) {
     var alphaNum = alphaPool[alphaIndex].length; // number of letter in pool
     if (alphaNum > 0) { // if pool contains this letter
       var next = TSTNode.getNext();
-      for (var i = 0; i < alphaNum; i++) { // use cascading combo theorem
-        
+      // use cascading combo theorem
+      for (var alphaNum; alphaNum > 0; alphaNum--) { 
         var alphaPoolCopy = new Array(26); // clone the pool
         for (var j = 0; j < 26; j++) {
           alphaPoolCopy[j] = alphaPool[j].slice(0);
         }
         var moveCopy = move.slice(0); // clone the move
-        // remove i from the end of this letter's pool
-        alphaPoolCopy[alphaIndex] = alphaPoolCopy[alphaIndex].slice(i);
+        // truncate this letter's pool to length alphaNum
+        alphaPoolCopy[alphaIndex].length = alphaNum;
         // remove the ith from the end and add it to the move
         moveCopy[letterNum] = alphaPoolCopy[alphaIndex].pop();
         // if next exists, add moves from further down the TST
