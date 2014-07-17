@@ -5,6 +5,18 @@ BOARD_MAX = 50;
 BOARD_MIN = -50;
 BEST_MOVES_LEN = 2;
 
+// random helper functions
+
+// Randomly shuffles the tiles IN PLACE by the KFY shuffle algorithm
+function shuffle(tiles) {
+  for (var i = tiles.length - 1; i > 0; i--) {
+    var r = Math.floor(Math.random()*(i+1));
+    var temp = tiles[i];
+    tiles[i] = tiles[r];
+    tiles[r] = temp;
+  }
+}
+
 /* constructor for a Game
  * REQUIRES: aName is a string, aMyTurn is a boolean, aBoard is a valid
  * board 25-array of tiles (each is an array of [letter, color])),
@@ -119,6 +131,20 @@ function Game(aName, aMyTurn, aBoard, aPlayedWords, aDate) {
 
   // private helper methods for findBestMoves
 
+  /* wrapper for findMoves. Basically sets up the initial parameters, which
+   * includes remapping the tiles (with new vulnerabilities considered).
+   */
+  function genMoves(TSTRoot) {
+    // prepare parameters
+    var alphaPool = mapTileLocations();
+    var move = new Array(25);
+    for (var i = 0; i < 25; i++) {
+      move[i] = -1;
+    }
+    // generate and return moves
+    return findMoves(TSTRoot, alphaPool, move, 0);
+  }
+
   /* REQUIRES: TSTNode is the desired starting node, alphaPool is a pool
    * of letters mapped to positions by mapTileLocations, move is the move
    * constructed so far (represented as a 25-array, initially filled with
@@ -188,6 +214,21 @@ function Game(aName, aMyTurn, aBoard, aPlayedWords, aDate) {
     return locs;
   }
 
+  // count up the letters in an array indexed by letter
+  function unmapToAlpha(move) {
+    var alphaSet = new Array(26);
+    for (var i = 0; i < 26; i++) {
+      alphaSet[i] = 0;
+    }
+    var i = 0;
+    var pos = move[i];
+    while (pos != -1) {
+      alphaSet[board[pos][0].fromCharAt(0) - 97]++;
+      pos = move[++i];
+    }
+    return alphaSet;
+  }
+
   function convertToWord(move) {
     var word = "";
     var i = 0;
@@ -237,7 +278,6 @@ function Game(aName, aMyTurn, aBoard, aPlayedWords, aDate) {
   }
 
   // private methods
-
   function updateColors() {
     for (var r = 0; r < 5; r++)
     {
