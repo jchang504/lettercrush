@@ -11,6 +11,8 @@ function Node() {
   var left = null;
   var right = null;
   var next = null;
+  // for blocked words
+  var blocked;
 
   // getters
   this.getLetter = function() {
@@ -19,16 +21,29 @@ function Node() {
   this.isEndsWord = function() {
     return endsWord;
   }
-  this.getNext = function() {
-    return next;
-  }
   this.getLeft = function() {
     return left;
   }
   this.getRight = function() {
     return right;
   }
+  this.getNext = function() {
+    return next;
+  }
 
+  // setters
+  this.setLeft(aLeft) {
+    left = aLeft;
+  }
+  this.setRight(aRight) {
+    right = aRight;
+  }
+  this.setNext(aNext) {
+    next = aNext;
+  }
+  this.setEndsWord(aEndsWord) {
+    endsWord = aEndsWord;
+  }
 
   // temp for debugging
   this.countNodes = function() {
@@ -102,7 +117,7 @@ function Node() {
         endsWord = true;
       }
       else { // if more letters
-        if (next === null) {
+        if (next == null) {
           next = new Node();
         }
         next.insert(word.substring(1));
@@ -110,14 +125,14 @@ function Node() {
     }
 
     else if (firstLetter < letter) {
-      if (left === null) {
+      if (left == null) {
         left = new Node();
       }
       left.insert(word);
     }
 
     else {
-      if (right === null) {
+      if (right == null) {
         right = new Node();
       }
       right.insert(word);
@@ -132,7 +147,7 @@ function Node() {
   this.lookup = function(word) {
     var firstLetter = word.substring(0,1).toLowerCase();
 
-    if (firstLetter === letter) {
+    if (firstLetter == letter) {
       if (word.length == 1) {
         return true;
       }
@@ -142,18 +157,95 @@ function Node() {
     }
 
     else if (firstLetter < letter) {
-      if (left === null) {
+      if (left == null) {
         return false;
       }
       return left.lookup(word);
     }
 
     else { // firstLetter > letter
-      if (right === null) {
+      if (right == null) {
         return false;
       }
       return right.lookup(word);
     }
+  }
+
+  /* Deletes this word from the TST, and adds it to the blocked list
+   * REQUIRES: word is a string, minimum length 2, which is in the TST
+   * ENSURES: if word is not found in TST, returns false; else returns true
+   */
+  this.block = function(word) {
+    if (blocked === undefined) {
+      blocked = [];
+    }
+    var start = this.findSibling(word.substring(0,1));
+    if (start == null) {
+      return false;
+    }
+    if (start.deleteWord(word.substring(1))) {
+      blocked.push(word);
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+
+  /* Deletes this word from the TST
+   * REQUIRES: word is a string with length >= 1
+   */
+  this.deleteWord = function(word) {
+    if (next == null) {
+      return false;
+    }
+    var wordLetter = word.substring(0,1);
+    if (word.length == 1) {
+      var relation = 0; // parentNode.getNext() == childNode
+      var parentNode = this;
+      var childNode = next;
+      var childLetter = childNode.getLetter();
+      while (wordLetter != childLetter) {
+        parentNode = childNode;
+        if (wordLetter < childLetter) {
+          childNode = childNode.getLeft();
+          if (childNode == null) {
+            return false;
+          }
+          relation = -1; // parentNode.getLeft() == childNode
+        }
+        else {
+          childNode = childNode.getRight();
+          if (childNode == null) {
+            return false;
+          }
+          relation = 1; // parentNode.getRight() == childNode
+        }
+        childLetter = childNode.getLetter();
+      } // now childLetter == wordLetter
+      // if childNode is total leaf
+      if (childNode.getLeft() == null && childNode.getRight() == null && childNode.getNext() == null) {
+        switch(relation) { // remove it from tree
+          case -1:
+            parentNode.setLeft(null);
+            break;
+          case 0:
+            parentNode.setNext(null);
+            break;
+          case 1:
+            parentNode.setRight(null);
+            break;
+        }
+      }
+      else { // childNode is not a leaf
+        childNode.setEndsWord(false);
+      }
+    }
+    var nextNode = next.findSibling(wordLetter);
+    if (nextNode == null) {
+      return false;
+    }
+    return nextNode.deleteWord(word.substring(1));
   }
 
 }
