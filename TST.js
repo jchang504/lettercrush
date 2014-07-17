@@ -7,7 +7,7 @@
 function Node() {
   // private variables
   var letter = null;
-  var endsWord = null;
+  var endsWord = false;
   var left = null;
   var right = null;
   var next = null;
@@ -32,16 +32,16 @@ function Node() {
   }
 
   // setters
-  this.setLeft(aLeft) {
+  this.setLeft = function(aLeft) {
     left = aLeft;
   }
-  this.setRight(aRight) {
+  this.setRight = function(aRight) {
     right = aRight;
   }
-  this.setNext(aNext) {
+  this.setNext = function(aNext) {
     next = aNext;
   }
-  this.setEndsWord(aEndsWord) {
+  this.setEndsWord = function(aEndsWord) {
     endsWord = aEndsWord;
   }
 
@@ -59,6 +59,7 @@ function Node() {
     }
     return count+1;
   }
+  //temp
 
   // privileged methods
 
@@ -149,25 +150,22 @@ function Node() {
 
     if (firstLetter == letter) {
       if (word.length == 1) {
-        return true;
+        return endsWord;
       }
       else { // if more letters
+        if (next == null) {
+          return false;
+        }
         return next.lookup(word.substring(1));
       }
     }
 
-    else if (firstLetter < letter) {
-      if (left == null) {
+    else {
+      var checkNext = this.findSibling(firstLetter);
+      if (checkNext == null) {
         return false;
       }
-      return left.lookup(word);
-    }
-
-    else { // firstLetter > letter
-      if (right == null) {
-        return false;
-      }
-      return right.lookup(word);
+      return checkNext.lookup(word);
     }
   }
 
@@ -181,9 +179,11 @@ function Node() {
     }
     var start = this.findSibling(word.substring(0,1));
     if (start == null) {
+      console.log('start is null');
       return false;
     }
     if (start.deleteWord(word.substring(1))) {
+      console.log('delete successful');
       blocked.push(word);
       return true;
     }
@@ -192,7 +192,7 @@ function Node() {
     }
   }
 
-  /* Deletes this word from the TST
+  /* Deletes this word from the TST, AFTER the current node (see block)
    * REQUIRES: word is a string with length >= 1
    */
   this.deleteWord = function(word) {
@@ -241,11 +241,15 @@ function Node() {
         childNode.setEndsWord(false);
       }
     }
-    var nextNode = next.findSibling(wordLetter);
-    if (nextNode == null) {
-      return false;
+    else {
+      var nextNode = next.findSibling(wordLetter);
+      if (nextNode == null) {
+        return false;
+      }
+      return nextNode.deleteWord(word.substring(1));
     }
-    return nextNode.deleteWord(word.substring(1));
+    // delete successful
+    return true;
   }
 
 }
