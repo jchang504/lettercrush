@@ -10,7 +10,7 @@ function loadGame() {
 // load the dictionary file
 function loadDict() {
   $('#load-dict').css('display', 'block');
-  $.get('testdictionary.dat', function(data) { // TST is 607490 nodes
+  $.get('dictionary.dat', function(data) { // TST is 607490 nodes
     $('#done-dict').css('display', 'block');
     main(data);
   });
