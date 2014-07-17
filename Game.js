@@ -5,6 +5,18 @@ BOARD_MAX = 50;
 BOARD_MIN = -50;
 BEST_MOVES_LEN = 10;
 
+// random helper functions
+
+// Randomly shuffles the tiles IN PLACE by the KFY shuffle algorithm
+function shuffle(tiles) {
+  for (var i = tiles.length - 1; i > 0; i--) {
+    var r = Math.floor(Math.random()*(i+1));
+    var temp = tiles[i];
+    tiles[i] = tiles[r];
+    tiles[r] = temp;
+  }
+}
+
 /* constructor for a Game
  * REQUIRES: aName is a string, aMyTurn is a boolean, aBoard is a valid
  * board 25-array of tiles (each is an array of [letter, color])),
@@ -74,20 +86,13 @@ function Game(aName, aMyTurn, aBoard, aPlayedWords, aDate) {
     }
     console.log(count);
     */
-    // NAIVE ALGORITHM, no lookahead, keep 5
     bestMoves = new Array(BEST_MOVES_LEN);
     bestMovesValue = new Array(BEST_MOVES_LEN);
     for (var i = 0; i < BEST_MOVES_LEN; i++) {
       bestMoves[i] = null;
       bestMovesValue[i] = BOARD_MIN;
     }
-    var alphaPool = mapTileLocations();
-    var move = new Array(25);
-    for (var i = 0; i < 25; i++) {
-      move[i] = -1;
-    }
-    // generate moves
-    var movesList = findMoves(TSTRoot, alphaPool, move, 0);
+    var movesList = genMoves(TSTRoot);
     console.log('movesList.length: ' + String(movesList.length));
     // evaluate and find the top 10
     for (var i = 0; i < movesList.length; i++) {
@@ -113,6 +118,20 @@ function Game(aName, aMyTurn, aBoard, aPlayedWords, aDate) {
   }
 
   // private helper methods for findBestMoves
+
+  /* wrapper for findMoves. Basically sets up the initial parameters, which
+   * includes remapping the tiles (with new vulnerabilities considered).
+   */
+  function genMoves(TSTRoot) {
+    // prepare parameters
+    var alphaPool = mapTileLocations();
+    var move = new Array(25);
+    for (var i = 0; i < 25; i++) {
+      move[i] = -1;
+    }
+    // generate moves
+    var movesList = findMoves(TSTRoot, alphaPool, move, 0);
+  }
 
   /* REQUIRES: TSTNode is the desired starting node, alphaPool is a pool
    * of letters mapped to positions by mapTileLocations, move is the move
@@ -206,17 +225,6 @@ function Game(aName, aMyTurn, aBoard, aPlayedWords, aDate) {
     return alphaSet;
   }
 
-  // Randomly shuffles the tiles IN PLACE by the KFY shuffle algorithm
-  function shuffle(tiles) {
-    for (var i = tiles.length - 1; i > 0; i--) {
-      var r = Math.floor(Math.random()*(i+1));
-      var temp = tiles[i];
-      tiles[i] = tiles[r];
-      tiles[r] = temp;
-    }
-  }
-
-  
   function convertToWord(move) {
     var word = "";
     var i = 0;
