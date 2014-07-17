@@ -92,9 +92,13 @@ function Game(aName, aMyTurn, aBoard, aPlayedWords, aDate) {
       bestMoves[i] = null;
       bestMovesValue[i] = BOARD_MIN;
     }
+    var start = new Date();
     var movesList = genMoves(TSTRoot);
+    var end = new Date();
     console.log('movesList.length: ' + String(movesList.length));
+    console.log('movesList generation took: ' + String(end - start));
     // evaluate and find the top 10
+    var start = new Date();
     for (var i = 0; i < movesList.length; i++) {
       var move = movesList[i];
       var moveValue = this.valueMove(move);
@@ -112,8 +116,10 @@ function Game(aName, aMyTurn, aBoard, aPlayedWords, aDate) {
         bestMovesValue[insertIndex] = moveValue;
       }
     }
+    var end = new Date();
+    console.log('Selecting bestMoves took: ' + String(end - start));
     for (var i = 0; i < BEST_MOVES_LEN; i++) {
-      console.log(convertToWord(bestMoves[i]));
+      console.log(bestMoves[i]);
     }
   }
 
@@ -129,8 +135,8 @@ function Game(aName, aMyTurn, aBoard, aPlayedWords, aDate) {
     for (var i = 0; i < 25; i++) {
       move[i] = -1;
     }
-    // generate moves
-    var movesList = findMoves(TSTRoot, alphaPool, move, 0);
+    // generate and return moves
+    return findMoves(TSTRoot, alphaPool, move, 0);
   }
 
   /* REQUIRES: TSTNode is the desired starting node, alphaPool is a pool
@@ -139,28 +145,35 @@ function Game(aName, aMyTurn, aBoard, aPlayedWords, aDate) {
    * -1's), and letterNum is the next index to add a letter position in
    * move (i.e. the number (position) of the next letter in the
    * constructed word.
-   * ENSURES: Find and returns an array of possible moves
+   * ENSURES: Find and returns an array of possible moves, including all
+   * positional combinations of each word!
    */
   function findMoves(TSTNode, alphaPool, move, letterNum) {
     var moveList = [];
     // get the index for this node's letter
     var alphaIndex = TSTNode.getLetter().charCodeAt(0)-97;
-    if (alphaPool[alphaIndex].length > 0) { // if pool contains this letter
-      var alphaPoolCopy = new Array(26); // clone the pool
-      for (var i = 0; i < 26; i++) {
-        alphaPoolCopy[i] = alphaPool[i].slice(0);
-      }
-      var moveCopy = move.slice(0); // clone the move
-      // remove letter from pool, and mark position in move
-      moveCopy[letterNum] = alphaPoolCopy[alphaIndex].pop();
+    var alphaNum = alphaPool[alphaIndex].length; // number of letter in pool
+    if (alphaNum > 0) { // if pool contains this letter
       var next = TSTNode.getNext();
-      // if next exists, add moves from further down the TST
-      if (next != null) {
-        moveList = findMoves(TSTNode.getNext(), alphaPoolCopy, moveCopy, letterNum+1);
-      }
-      // if this node ends a word, add the (new) move
-      if (TSTNode.isEndsWord()) {
-        moveList.push(moveCopy);
+      for (var i = 0; i < alphaNum; i++) { // use cascading combo theorem
+        
+        var alphaPoolCopy = new Array(26); // clone the pool
+        for (var j = 0; j < 26; j++) {
+          alphaPoolCopy[j] = alphaPool[j].slice(0);
+        }
+        var moveCopy = move.slice(0); // clone the move
+        // remove i from the end of this letter's pool
+        alphaPoolCopy[alphaIndex] = alphaPoolCopy[alphaIndex].slice(i);
+        // remove the ith from the end and add it to the move
+        moveCopy[letterNum] = alphaPoolCopy[alphaIndex].pop();
+        // if next exists, add moves from further down the TST
+        if (next != null) {
+          moveList = moveList.concat(findMoves(next, alphaPoolCopy, moveCopy, letterNum+1));
+        }
+        // if this node ends a word, add the (new) move
+        if (TSTNode.isEndsWord()) {
+          moveList.push(moveCopy);
+        }
       }
     }
     // if left exists, add moves from the left node
@@ -185,27 +198,12 @@ function Game(aName, aMyTurn, aBoard, aPlayedWords, aDate) {
    * tile ordering.
    */
   function mapTileLocations() {
-    // one array for vulnerable, one for invulnerable
-    var vuln = new Array(26); 
-    var invuln = new Array(26);
-    for (var i = 0; i < 26; i++) {
-      vuln[i] = []; 
-      invuln[i] = [];
-    }
-    for (var i = 0; i < 25; i++) {
-      if (board[i][1] > 0 || board[i][1] == -2) {
-        invuln[board[i][0].charCodeAt(0) - 97].push(i);
-      }
-      else {
-        vuln[board[i][0].charCodeAt(0) - 97].push(i);
-      }
-    }
     var locs = new Array(26);
     for (var i = 0; i < 26; i++) {
-      // shuffle the vulnerable tiles
-      shuffle(vuln[i]);
-      // now combine both with vulnerable LAST (we pop from end)
-      locs[i] = invuln[i].concat(vuln[i]);
+      locs[i] = [];
+    }
+    for (var i = 0; i < 25; i++) {
+      locs[board[i][0].charCodeAt(0) - 97].push(i);
     }
     return locs;
   }
