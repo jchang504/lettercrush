@@ -1,4 +1,4 @@
-// Implements the Game class for Letterpress Victory 2.0
+// Implements the Game and GameState classes
 
 // global constant variable
 BOARD_MAX = 50;
@@ -12,20 +12,19 @@ BEST_MOVES_LEN = 10;
  * been played, and aDate is the current date (a Date object)
  * ENSURES: returns a Game representing these facts
  */
-function Game(aName, aMyTurn, aBoard, aBlockedWords, aTST) {
+function Game(aName, aMyTurn, aBoard, blockedWords, aTST) {
   // public variables
   this.name = aName;
   // private variables
   var date = new Date();
   var myTurn = aMyTurn;
   var board = aBoard;
-  var blockedWords = aBlockedWords;
   var TST = aTST;
   var bestMoves = null;
   var bestMoveValues = null;
   // block initial words in TST
   for (var i = 0; i < blockedWords.length; i++) {
-    console.log('block ' + String(blockedWords[i]) + ' returned: ' + String(TST.block(blockedWords[i])));
+    TST.block(blockedWords[i]);
   }
 
   // Getters
