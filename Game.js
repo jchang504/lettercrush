@@ -12,14 +12,15 @@ BEST_MOVES_LEN = 2;
  * been played, and aDate is the current date (a Date object)
  * ENSURES: returns a Game representing these facts
  */
-function Game(aName, aMyTurn, aBoard, aPlayedWords, aDate) {
+function Game(aName, aMyTurn, aBoard, aBlockedWords, aTST) {
   // public variables
   this.name = aName;
   // private variables
+  var date = new Date();
   var myTurn = aMyTurn;
   var board = aBoard;
-  var playedWords = aPlayedWords;
-  var date = aDate;
+  var blockedWords = aBlockedWords;
+  var TST = aTST;
   var bestMoves = null;
   var bestMoveValues = null;
 
@@ -29,9 +30,6 @@ function Game(aName, aMyTurn, aBoard, aPlayedWords, aDate) {
   }
   this.getBoard = function() {
     return board;
-  }
-  this.getPlayedWords = function() {
-    return playedWords;
   }
 
   //temporary
@@ -57,11 +55,21 @@ function Game(aName, aMyTurn, aBoard, aPlayedWords, aDate) {
 
   // privileged methods
 
+  /* Plays the move on this game, effecting the necessary board changes.
+   */
+  this.play = function(move) {
+    var state = new GameState(myTurn, board, []);
+    state.playMove(move);
+    board = state.getBoard(); // update board
+    TST.block(state.getPlayedWords[0]); // block word in TST
+    myTurn = !myTurn; // change turns
+  }
+
   /* Find and set the bestMoves
    * REQUIRES: timeLimit is a time limit in seconds (minimum 1)
    * ENSURES: finds and sets the bestMoves within at most timeLimit seconds
    */
-  this.findBestMoves = function(TSTRoot, timeLimit) {
+  this.findBestMoves = function(timeLimit) {
     /*
     var count = 0;
     var endTime = new Date().getTime() + 1000*timeLimit;
@@ -87,7 +95,7 @@ function Game(aName, aMyTurn, aBoard, aPlayedWords, aDate) {
       move[i] = -1;
     }
     // generate moves
-    var moveList = findMoves(TSTRoot, alphaPool, move, 0);
+    var moveList = findMoves(TST, alphaPool, move, 0);
     var end = new Date();
     console.log('movesList.length: ' + String(movesList.length));
     console.log('movesList generation took: ' + String(end - start));
@@ -173,9 +181,6 @@ function Game(aName, aMyTurn, aBoard, aPlayedWords, aDate) {
   /* REQUIRES: true
    * ENSURES: returns a 26-array representing the alphabet. Each element
    * is an array of indices of that letter in the board (possibly empty).
-   * IMPORTANT: considers vulnerability of tiles from myTurn == true
-   * perspective, should ONLY be called from this perspective for accurate
-   * tile ordering.
    */
   function mapTileLocations() {
     var locs = new Array(26);
@@ -188,26 +193,30 @@ function Game(aName, aMyTurn, aBoard, aPlayedWords, aDate) {
     return locs;
   }
 
-  function convertToWord(move) {
-    var word = "";
-    var i = 0;
-    var pos = move[i];
-    while (pos != -1) {
-      word += board[pos][0];
-      pos = move[++i];
-    }
-    return word;
-  }
+}
+
+function GameState(aMyTurn, aBoard, aPlayedWords) {
+  var myTurn = aMyTurn;
+  var board = aBoard;
+  var playedWords = aPlayedWords;
 
   // privileged methods
+
+  this.getBoard = function() {
+    return board;
+  }
+
+  this.getPlayedWords = function () {
+    return playedWords;
+  }
 
   /* REQUIRES: move is a bit (number) array of length 25
    * ENSURES: returns the value of the board after this move
    */
   this.valueMove = function(move) {
-    var gameClone = clone();
-    gameClone.playMove(move);
-    return gameClone.valueBoard();
+    var stateClone = clone();
+    stateClone.playMove(move);
+    return stateClone.valueBoard();
   }
 
   this.valueBoard = function() {
@@ -259,13 +268,23 @@ function Game(aName, aMyTurn, aBoard, aPlayedWords, aDate) {
     }
   }
 
+  function convertToWord(move) {
+    var word = "";
+    var i = 0;
+    var pos = move[i];
+    while (pos != -1) {
+      word += board[pos][0];
+      pos = move[++i];
+    }
+    return word;
+  }
+
   // returns a nameless, dateless clone of this Game
   function clone() {
     var boardClone = new Array(25);
     for (var i = 0; i < 25; i++) {
       boardClone[i] = board[i].slice(0);
     }
-    return new Game(null, myTurn, boardClone, playedWords.slice(0), null);
+    return new GameState(myTurn, boardClone, playedWords.slice(0));
   }
-
 }

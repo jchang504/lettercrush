@@ -31,10 +31,10 @@ function main(data) {
     for (var i = 0; i < 25; i++) {
       testBoard[i] = [testLetters[i], 0];
     }
-    var game = new Game('test', true, testBoard, [], new Date());
+    var game = new Game('test', true, testBoard, [], root);
     game.printBoard();
     start = new Date();
-    game.findBestMoves(root, 30);
+    game.findBestMoves(30);
     end = new Date();
     console.log('findBestMoves took: ' + String(end - start));
   }
