@@ -25,7 +25,7 @@ function Game(aName, aMyTurn, aBoard, aBlockedWords, aTST) {
   var bestMoveValues = null;
   // block initial words in TST
   for (var i = 0; i < blockedWords.length; i++) {
-    TST.block(blockedWords[i]);
+    console.log('block ' + String(blockedWords[i]) + ' returned: ' + String(TST.block(blockedWords[i])));
   }
 
   // Getters

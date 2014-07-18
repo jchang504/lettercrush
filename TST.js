@@ -59,6 +59,13 @@ function Node() {
     }
     return count+1;
   }
+
+  this.printBlocked = function() {
+    console.log('blocked: ');
+    for (var i = 0; i < blocked.length; i++) {
+      console.log(blocked[i]);
+    }
+  }
   //temp
 
   // privileged methods
@@ -174,18 +181,26 @@ function Node() {
    * ENSURES: if word is not found in TST, returns false; else returns true
    */
   this.block = function(word) {
+    console.log('CALL block: word = ' + word);
     if (blocked === undefined) {
       blocked = [];
     }
+    console.log('finding sibling with letter: ' + word.substring(0,1));
     var start = this.findSibling(word.substring(0,1));
+    console.log('found. start is: ' + String(start));
+    console.log('start\'s letter is: ' + start.getLetter());
     if (start == null) {
+      console.log('start is null');
       return false;
     }
+    console.log('start\'s letter: ' + start.getLetter());
+    console.log('word to delete: ' + word.substring(1));
     if (start.deleteWord(word.substring(1))) {
       blocked.push(word);
       return true;
     }
     else {
+      console.log('delete returned false');
       return false;
     }
   }
@@ -194,7 +209,9 @@ function Node() {
    * REQUIRES: word is a string with length >= 1
    */
   this.deleteWord = function(word) {
+    console.log('CALL deleteWord: letter = ' + letter + '; word = ' + word);
     if (next == null) {
+      console.log('next is null');
       return false;
     }
     var wordLetter = word.substring(0,1);
@@ -208,6 +225,7 @@ function Node() {
         if (wordLetter < childLetter) {
           childNode = childNode.getLeft();
           if (childNode == null) {
+            console.log('childNode left is null');
             return false;
           }
           relation = -1; // parentNode.getLeft() == childNode
@@ -215,6 +233,7 @@ function Node() {
         else {
           childNode = childNode.getRight();
           if (childNode == null) {
+            console.log('childNode right is null');
             return false;
           }
           relation = 1; // parentNode.getRight() == childNode
@@ -242,6 +261,7 @@ function Node() {
     else {
       var nextNode = next.findSibling(wordLetter);
       if (nextNode == null) {
+        console.log('nextNode is null');
         return false;
       }
       return nextNode.deleteWord(word.substring(1));

@@ -31,8 +31,11 @@ function main(data) {
     for (var i = 0; i < 25; i++) {
       testBoard[i] = [testLetters[i], 0];
     }
-    var game = new Game('test', true, testBoard, [], root);
-    game.printBoard();
+    console.log('before praiseworthy: ' + String(root.lookup('praiseworthy')));
+    console.log('before orthopterist: ' + String(root.lookup('orthopterist')));
+    var game = new Game('test', true, testBoard, ['praiseworthy', 'orthopterist'], root);
+    console.log('after praiseworthy: ' + String(root.lookup('praiseworthy')));
+    console.log('after orthopterist: ' + String(root.lookup('orthopterist')));
     start = new Date();
     game.findBestMoves(30);
     end = new Date();
