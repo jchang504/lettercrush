@@ -3,7 +3,7 @@
 // global constant variable
 BOARD_MAX = 50;
 BOARD_MIN = -50;
-BEST_MOVES_LEN = 2;
+BEST_MOVES_LEN = 10;
 
 /* constructor for a Game
  * REQUIRES: aName is a string, aMyTurn is a boolean, aBoard is a valid
@@ -23,6 +23,10 @@ function Game(aName, aMyTurn, aBoard, aBlockedWords, aTST) {
   var TST = aTST;
   var bestMoves = null;
   var bestMoveValues = null;
+  // block initial words in TST
+  for (var i = 0; i < blockedWords.length; i++) {
+    TST.block(blockedWords[i]);
+  }
 
   // Getters
   this.isMyTurn = function() {
@@ -95,15 +99,16 @@ function Game(aName, aMyTurn, aBoard, aBlockedWords, aTST) {
       move[i] = -1;
     }
     // generate moves
-    var moveList = findMoves(TST, alphaPool, move, 0);
+    var movesList = findMoves(TST, alphaPool, move, 0);
     var end = new Date();
     console.log('movesList.length: ' + String(movesList.length));
     console.log('movesList generation took: ' + String(end - start));
     // evaluate and find the top 10
     var start = new Date();
+    var startState = new GameState(true, board, []);
     for (var i = 0; i < movesList.length; i++) {
       var move = movesList[i];
-      var moveValue = this.valueMove(move);
+      var moveValue = startState.valueMove(move);
       var insertIndex = BEST_MOVES_LEN;
       for (var j = BEST_MOVES_LEN-1; j >= 0; j--) {
         if (moveValue > bestMovesValue[j]) {
@@ -113,7 +118,7 @@ function Game(aName, aMyTurn, aBoard, aBlockedWords, aTST) {
           break;
         }
       }
-      if (insertIndex < BEST_MOVES_LEN && playedWords.indexOf(convertToWord(move)) == -1) {
+      if (insertIndex < BEST_MOVES_LEN) {
         bestMoves[insertIndex] = move;
         bestMovesValue[insertIndex] = moveValue;
       }

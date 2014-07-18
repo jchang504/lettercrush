@@ -179,11 +179,9 @@ function Node() {
     }
     var start = this.findSibling(word.substring(0,1));
     if (start == null) {
-      console.log('start is null');
       return false;
     }
     if (start.deleteWord(word.substring(1))) {
-      console.log('delete successful');
       blocked.push(word);
       return true;
     }
@@ -250,6 +248,13 @@ function Node() {
     }
     // delete successful
     return true;
+  }
+
+  // unblocks (inserts) all blocked words
+  this.unblock = function() {
+    for (var i = 0; i < blocked.length; i++) {
+      this.insert(blocked[i]);
+    }
   }
 
 }
