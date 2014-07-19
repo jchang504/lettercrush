@@ -1,90 +1,21 @@
 // This file implements a Ternary Search Trie
 
-/* Constructor for Node class
- * REQUIRES: true
- * ENSURES: returns a Node
+/* Constructor for a TST
+ * REQUIRES: dictionary is an array of lowercase words in alphabetical
+ * order (very important for building a balanced tree!)
  */
-function Node() {
-  // private variables
-  var letter = null;
-  var endsWord = false;
-  var left = null;
-  var right = null;
-  var next = null;
-  // for blocked words
-  var blocked;
+function TST(dictionary) {
+  var root = new TSTNode();
+  var blocked = [];
 
-  // getters
-  this.getLetter = function() {
-    return letter;
-  }
-  this.isEndsWord = function() {
-    return endsWord;
-  }
-  this.getLeft = function() {
-    return left;
-  }
-  this.getRight = function() {
-    return right;
-  }
-  this.getNext = function() {
-    return next;
+  this.getRoot = function() {
+    return root;
   }
 
-  // setters
-  this.setLeft = function(aLeft) {
-    left = aLeft;
-  }
-  this.setRight = function(aRight) {
-    right = aRight;
-  }
-  this.setNext = function(aNext) {
-    next = aNext;
-  }
-  this.setEndsWord = function(aEndsWord) {
-    endsWord = aEndsWord;
-  }
-
-  // temp for debugging
-  this.countNodes = function() {
-    var count = 0;
-    if (left != null) {
-      count += left.countNodes();
-    }
-    if (right != null) {
-      count += right.countNodes();
-    }
-    if (next != null) {
-      count += next.countNodes();
-    }
-    return count+1;
-  }
-  //temp
-
-  // privileged methods
-
-  /* Goes left or right to find the sibling matching the sibLetter, and
-   * returns it. If it can't be found, returns null. May return itself.
-   */
-  this.findSibling = function(sibLetter) {
-    if (sibLetter < letter) {
-      if (left != null) {
-        return left.findSibling(sibLetter);
-      }
-      else { // nothing on the left
-        return null;
-      }
-    }
-    else if (sibLetter > letter) {
-      if (right != null) {
-        return right.findSibling(sibLetter);
-      }
-      else { // nothing on the right
-        return null;
-      }
-    }
-    else { // sibLetter == letter
-      return this;
+  // unblocks (inserts) all blocked words
+  this.unblock = function() {
+    for (var i = 0; i < blocked.length; i++) {
+      this.insert(blocked[i]);
     }
   }
 
@@ -106,68 +37,127 @@ function Node() {
   }
 
   /* Insert
-   * REQUIRES: word is a string
+   * REQUIRES: word is a lowercase string
    * ENSURES: inserts the word into the TST
    */
   this.insert = function(word) {
-    var firstLetter = word.substring(0,1);
-
-    if (firstLetter === letter || letter === null) {
-      letter = firstLetter;
-      if (word.length == 1) {
-        endsWord = true;
-      }
-      else { // if more letters
-        if (next == null) {
-          next = new Node();
+    var temp = root;
+    var i = 0;
+    while (i < word.length) {
+      var wordLetter = word.substring(i,i+1);
+      if (wordLetter === temp.letter || temp.letter === null) {
+        temp.letter = wordLetter;
+        if (i == word.length - 1) {
+          temp.endsWord = true;
         }
-        next.insert(word.substring(1));
+        else { // if not done, go on to next
+          if (temp.next == null) {
+            temp.next = new TSTNode();
+          }
+          temp = temp.next;
+        }
+        i++; // go to next letter
+      }
+      else if (wordLetter < temp.letter) {
+        if (temp.left == null) { // create node if needed
+          temp.left = new TSTNode();
+        }
+        temp = temp.left; // move left
+      }
+      else { // wordLetter > temp.letter
+        if (temp.right == null) { // create node if needed
+          temp.right = new TSTNode();
+        }
+        temp = temp.right; // move right
       }
     }
-
-    else if (firstLetter < letter) {
-      if (left == null) {
-        left = new Node();
-      }
-      left.insert(word);
-    }
-
-    else {
-      if (right == null) {
-        right = new Node();
-      }
-      right.insert(word);
-    }
+    // end insert
   }
 
   /* Lookup
    * REQUIRES: word is a string
-   * ENSURES: returns true iff word is contained in the TST rooted at
-   * this node
+   * ENSURES: returns true iff word is contained in the TST; false otherwise
    */
   this.lookup = function(word) {
-    var firstLetter = word.substring(0,1).toLowerCase();
-
-    if (firstLetter == letter) {
-      if (word.length == 1) {
-        return endsWord;
-      }
-      else { // if more letters
-        if (next == null) {
-          return false;
-        }
-        return next.lookup(word.substring(1));
-      }
-    }
-
-    else {
-      var checkNext = this.findSibling(firstLetter);
-      if (checkNext == null) {
+    word = word.toLowerCase();
+    var temp = root;
+    for (var i = 0; i < word.length; i++) {
+      temp = temp.findSibling(word.substring(i,i+1));
+      if (temp == null) { // letter not found
         return false;
       }
-      return checkNext.lookup(word);
+      else { // temp.letter == word.substring(i,i+1); go to next
+        temp = temp.next;
+        if (temp == null) {
+          return false;
+        }
+      }
+    }
+    // now temp is the node of the last letter, so
+    return temp.endsWord;
+  }
+
+  // define stuff first, then finish constructing
+  this.addWords(dictionary);
+
+}
+
+/* Constructor for TSTNode class
+ * Creates a new blank Node (should only be called in TST methods, and
+ * immediately filled with values)
+ */
+function TSTNode() {
+  // private variables
+  this.letter = null;
+  this.endsWord = false;
+  this.left = null;
+  this.right = null;
+  this.next = null;
+
+  // temp for debugging
+  this.countNodes = function() {
+    var count = 0;
+    if (this.left != null) {
+      count += this.left.countNodes();
+    }
+    if (this.right != null) {
+      count += this.right.countNodes();
+    }
+    if (this.next != null) {
+      count += this.next.countNodes();
+    }
+    return count+1;
+  }
+  //temp
+
+  // privileged methods
+
+  /* Goes left or right to find the sibling matching the sibLetter, and
+   * returns it. If it can't be found, returns null. May return itself.
+   */
+  this.findSibling = function(sibLetter) {
+    if (sibLetter < this.letter) {
+      if (this.left != null) {
+        return this.left.findSibling(sibLetter);
+      }
+      else { // nothing on the left
+        return null;
+      }
+    }
+    else if (sibLetter > this.letter) {
+      if (this.right != null) {
+        return this.right.findSibling(sibLetter);
+      }
+      else { // nothing on the right
+        return null;
+      }
+    }
+    else { // sibLetter == letter
+      return this;
     }
   }
+
+
 
   /* Deletes this word from the TST, and adds it to the blocked list
    * REQUIRES: word is a string, minimum length 2, which is in the TST
@@ -250,20 +240,4 @@ function Node() {
     return true;
   }
 
-  // unblocks (inserts) all blocked words
-  this.unblock = function() {
-    for (var i = 0; i < blocked.length; i++) {
-      this.insert(blocked[i]);
-    }
-  }
-
-}
-
-/* REQUIRES: words is an alphabetically-sorted list of words
- * ENSURES: returns a balanced TST containing words
- */
-function buildTST(words) {
-  var root = new Node();
-  root.addWords(words);
-  return root;
 }
