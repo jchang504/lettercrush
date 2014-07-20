@@ -63,8 +63,8 @@ function Game(aName, aMyTurn, aBoard, blockedWords, aTst) {
   this.play = function(move) {
     var state = new GameState(myTurn, board, []);
     state.playMove(move);
-    board = state.getBoard(); // update board
-    tst.block(state.getPlayedWords[0]); // block word in TST
+    board = state.board; // update board
+    tst.block(state.playedWords[0]); // block word in TST
     myTurn = !myTurn; // change turns
   }
 
@@ -200,95 +200,87 @@ function Game(aName, aMyTurn, aBoard, blockedWords, aTst) {
 }
 
 function GameState(aMyTurn, aBoard, aPlayedWords) {
-  var myTurn = aMyTurn;
-  var board = aBoard;
-  var playedWords = aPlayedWords;
 
-  // privileged methods
+  this.myTurn = aMyTurn;
+  this.board = aBoard;
+  this.playedWords = aPlayedWords;
 
-  this.getBoard = function() {
-    return board;
+}
+
+/* REQUIRES: move is a bit (number) array of length 25
+ * ENSURES: returns the value of the board after this move
+ */
+GameState.prototype.valueMove = function(move) {
+  var stateClone = this.clone();
+  stateClone.playMove(move);
+  return stateClone.valueBoard();
+}
+
+GameState.prototype.valueBoard = function() {
+  var sum = 0;
+  for (var i = 0; i < 25; i++) {
+    sum += this.board[i][1];
   }
+  return sum;
+}
 
-  this.getPlayedWords = function () {
-    return playedWords;
-  }
-
-  /* REQUIRES: move is a bit (number) array of length 25
-   * ENSURES: returns the value of the board after this move
-   */
-  this.valueMove = function(move) {
-    var stateClone = clone();
-    stateClone.playMove(move);
-    return stateClone.valueBoard();
-  }
-
-  this.valueBoard = function() {
-    var sum = 0;
-    for (var i = 0; i < 25; i++) {
-      sum += board[i][1];
+/* move is a 25-array, filled from the left with the positions of the
+ * tiles to use in order. The rest are filled with -1.
+ */
+GameState.prototype.playMove = function(move) {
+  var color = this.myTurn ? 1 : -1;
+  var i = 0;
+  var pos = move[i];
+  while (pos != -1) {
+    if (Math.abs(this.board[pos][1]) != 2) {
+      this.board[pos][1] = color;
     }
-    return sum;
+    pos = move[++i];
   }
+  this.updateColors();
+  this.playedWords.push(this.convertToWord(move));
+  this.myTurn = !this.myTurn;
+}
 
-  /* move is a 25-array, filled from the left with the positions of the
-   * tiles to use in order. The rest are filled with -1.
-   */
-  this.playMove = function(move) {
-    var color = myTurn ? 1 : -1;
-    var i = 0;
-    var pos = move[i];
-    while (pos != -1) {
-      if (Math.abs(board[pos][1]) != 2) {
-        board[pos][1] = color;
-      }
-      pos = move[++i];
-    }
-    updateColors();
-    playedWords.push(convertToWord(move));
-    myTurn = !myTurn;
-  }
+// private methods
 
-  // private methods
-
-  function updateColors() {
-    for (var r = 0; r < 5; r++)
-    {
-      for (var c = 0; c < 5; c++) {
-        var myColor = board[5*r+c][1];
-        // if not white...
-        if (myColor != 0) {
-          if (r > 0 && board[5*(r-1)+c][1] * myColor <= 0 ||
-              r < 4 && board[5*(r+1)+c][1] * myColor <= 0 ||
-              c > 0 && board[5*r+(c-1)][1] * myColor <= 0 ||
-              c < 4 && board[5*r+(c+1)][1] * myColor <= 0) {
-            board[5*r+c][1] = (myColor > 0) ? 1 : -1;
-          }
-          else {
-            board[5*r+c][1] = (myColor > 0) ? 2 : -2;
-          }
+GameState.prototype.updateColors = function() {
+  for (var r = 0; r < 5; r++)
+  {
+    for (var c = 0; c < 5; c++) {
+      var myColor = this.board[5*r+c][1];
+      // if not white...
+      if (myColor != 0) {
+        if (r > 0 && this.board[5*(r-1)+c][1] * myColor <= 0 ||
+            r < 4 && this.board[5*(r+1)+c][1] * myColor <= 0 ||
+            c > 0 && this.board[5*r+(c-1)][1] * myColor <= 0 ||
+            c < 4 && this.board[5*r+(c+1)][1] * myColor <= 0) {
+          this.board[5*r+c][1] = (myColor > 0) ? 1 : -1;
+        }
+        else {
+          this.board[5*r+c][1] = (myColor > 0) ? 2 : -2;
         }
       }
     }
   }
+}
 
-  function convertToWord(move) {
-    var word = "";
-    var i = 0;
-    var pos = move[i];
-    while (pos != -1) {
-      word += board[pos][0];
-      pos = move[++i];
-    }
-    return word;
+GameState.prototype.convertToWord = function(move) {
+  var word = "";
+  var i = 0;
+  var pos = move[i];
+  while (pos != -1) {
+    word += this.board[pos][0];
+    pos = move[++i];
   }
+  return word;
+}
 
-  // returns a nameless, dateless clone of this Game
-  function clone() {
-    var boardClone = new Array(25);
-    for (var i = 0; i < 25; i++) {
-      boardClone[i] = board[i].slice(0);
-    }
-    return new GameState(myTurn, boardClone, playedWords.slice(0));
+// returns a nameless, dateless clone of this Game
+GameState.prototype.clone = function() {
+  var boardClone = new Array(25);
+  for (var i = 0; i < 25; i++) {
+    boardClone[i] = this.board[i].slice(0);
   }
+  return new GameState(this.myTurn, boardClone, this.playedWords.slice(0));
 }
