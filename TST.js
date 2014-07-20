@@ -32,11 +32,8 @@ function TST(dictionary) {
     }
     else { // length >= 3
       var medianIndex = Math.floor(words.length / 2);
-      if (VERBOSE) { console.log('inserting: ' + words[medianIndex]); }
       this.insert(words[medianIndex]);
-      if (VERBOSE) { console.log('add left is: ' + String(words.slice(0, medianIndex))); }
       this.addWords(words.slice(0, medianIndex)); // add left
-      if (VERBOSE) { console.log('add right is: ' + String(words.slice(medianIndex+1, words.length))); }
       this.addWords(words.slice(medianIndex + 1, words.length)); // add right
     }
   }
@@ -46,15 +43,11 @@ function TST(dictionary) {
    * ENSURES: inserts the word into the TST
    */
   this.insert = function(word) {
-    if (VERBOSE) { console.log('CALL insert: word = ' + word); }
-    var endTime = new Date().getTime() + 1000;
     var temp = root;
     var i = 0;
     while (i < word.length) {
-      if (VERBOSE) { console.log('in WHILE: i = ' + String(i)); }
       var wordLetter = word.substring(i,i+1);
       if (wordLetter === temp.letter || temp.letter === null) {
-        if (VERBOSE) { console.log('matched letter or creating next node'); }
         temp.letter = wordLetter;
         if (i == word.length - 1) {
           temp.endsWord = true;
@@ -68,22 +61,16 @@ function TST(dictionary) {
         i++; // go to next letter
       }
       else if (wordLetter < temp.letter) {
-        if (VERBOSE) { console.log('creating new node left'); }
         if (temp.left == null) { // create node if needed
           temp.left = new TSTNode();
         }
         temp = temp.left; // move left
       }
       else { // wordLetter > temp.letter
-        if (VERBOSE) { console.log('creating new node right'); }
         if (temp.right == null) { // create node if needed
           temp.right = new TSTNode();
         }
         temp = temp.right; // move right
-      }
-      if (new Date().getTime() >= endTime) {
-        console.log('Timed out.');
-        break;
       }
     }
     // end insert
@@ -102,7 +89,9 @@ function TST(dictionary) {
         return false;
       }
       else { // temp.letter == word.substring(i,i+1); go to next
-        temp = temp.next;
+        if (i < word.length - 1) { // ONLY if not on the last letter!
+          temp = temp.next;
+        }
         if (temp == null) {
           return false;
         }
