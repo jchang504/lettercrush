@@ -12,19 +12,19 @@ BEST_MOVES_LEN = 10;
  * been played, and aDate is the current date (a Date object)
  * ENSURES: returns a Game representing these facts
  */
-function Game(aName, aMyTurn, aBoard, blockedWords, aTST) {
+function Game(aName, aMyTurn, aBoard, blockedWords, aTst) {
   // public variables
   this.name = aName;
   // private variables
   var date = new Date();
   var myTurn = aMyTurn;
   var board = aBoard;
-  var TST = aTST;
+  var tst = aTst;
   var bestMoves = null;
   var bestMoveValues = null;
   // block initial words in TST
   for (var i = 0; i < blockedWords.length; i++) {
-    TST.block(blockedWords[i]);
+    tst.block(blockedWords[i]);
   }
 
   // Getters
@@ -64,7 +64,7 @@ function Game(aName, aMyTurn, aBoard, blockedWords, aTST) {
     var state = new GameState(myTurn, board, []);
     state.playMove(move);
     board = state.getBoard(); // update board
-    TST.block(state.getPlayedWords[0]); // block word in TST
+    tst.block(state.getPlayedWords[0]); // block word in TST
     myTurn = !myTurn; // change turns
   }
 
@@ -98,7 +98,7 @@ function Game(aName, aMyTurn, aBoard, blockedWords, aTST) {
       move[i] = -1;
     }
     // generate moves
-    var movesList = findMoves(TST, alphaPool, move, 0);
+    var movesList = findMoves(tst, alphaPool, move, 0);
     var end = new Date();
     console.log('movesList.length: ' + String(movesList.length));
     console.log('movesList generation took: ' + String(end - start));
@@ -131,7 +131,7 @@ function Game(aName, aMyTurn, aBoard, blockedWords, aTST) {
 
   // private helper methods for findBestMoves
 
-  /* REQUIRES: TSTNode is the desired starting node, alphaPool is a pool
+  /* REQUIRES: tstNode is the desired starting node, alphaPool is a pool
    * of letters mapped to positions by mapTileLocations, move is the move
    * constructed so far (represented as a 25-array, initially filled with
    * -1's), and letterNum is the next index to add a letter position in
@@ -140,13 +140,13 @@ function Game(aName, aMyTurn, aBoard, blockedWords, aTST) {
    * ENSURES: Find and returns an array of possible moves, including all
    * positional combinations of each word!
    */
-  function findMoves(TSTNode, alphaPool, move, letterNum) {
+  function findMoves(tstNode, alphaPool, move, letterNum) {
     var moveList = [];
     // get the index for this node's letter
-    var alphaIndex = TSTNode.getLetter().charCodeAt(0)-97;
+    var alphaIndex = tstNode.letter.charCodeAt(0)-97;
     var alphaNum = alphaPool[alphaIndex].length; // number of letter in pool
     if (alphaNum > 0) { // if pool contains this letter
-      var next = TSTNode.getNext();
+      var next = tstNode.next;
       // use cascading combo theorem
       for (var alphaNum; alphaNum > 0; alphaNum--) { 
         var alphaPoolCopy = new Array(26); // clone the pool
@@ -163,18 +163,18 @@ function Game(aName, aMyTurn, aBoard, blockedWords, aTST) {
           moveList = moveList.concat(findMoves(next, alphaPoolCopy, moveCopy, letterNum+1));
         }
         // if this node ends a word, add the (new) move
-        if (TSTNode.isEndsWord()) {
+        if (tstNode.endsWord) {
           moveList.push(moveCopy);
         }
       }
     }
     // if left exists, add moves from the left node
-    var left = TSTNode.getLeft();
+    var left = tstNode.left;
     if (left != null) {
       moveList = moveList.concat(findMoves(left, alphaPool, move, letterNum));
     }
     // if right exists, add moves from the right node
-    var right = TSTNode.getRight();
+    var right = tstNode.right;
     if (right != null) {
       moveList = moveList.concat(findMoves(right, alphaPool, move, letterNum));
     }
