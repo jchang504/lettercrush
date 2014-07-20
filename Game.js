@@ -98,7 +98,7 @@ function Game(aName, aMyTurn, aBoard, blockedWords, aTst) {
       move[i] = -1;
     }
     // generate moves
-    var movesList = findMoves(tst, alphaPool, move, 0);
+    var movesList = findMoves(tst.getRoot(), alphaPool, move, 0);
     var end = new Date();
     console.log('movesList.length: ' + String(movesList.length));
     console.log('movesList generation took: ' + String(end - start));

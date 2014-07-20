@@ -165,36 +165,36 @@ function TST(dictionary) {
  * immediately filled with values)
  */
 function TSTNode() {
-  // private variables
+
   this.letter = null;
   this.endsWord = false;
   this.left = null;
   this.right = null;
   this.next = null;
 
-  /* Goes left or right to find the sibling matching the sibLetter, and
-   * returns it. If it can't be found, returns null. May return itself.
-   */
-  this.findSibling = function(sibLetter) {
-    if (sibLetter < this.letter) {
-      if (this.left != null) {
-        return this.left.findSibling(sibLetter);
-      }
-      else { // nothing on the left
-        return null;
-      }
+}
+
+/* Goes left or right to find the sibling matching the sibLetter, and
+ * returns it. If it can't be found, returns null. May return itself.
+ */
+TSTNode.prototype.findSibling = function(sibLetter) {
+  if (sibLetter < this.letter) {
+    if (this.left != null) {
+      return this.left.findSibling(sibLetter);
     }
-    else if (sibLetter > this.letter) {
-      if (this.right != null) {
-        return this.right.findSibling(sibLetter);
-      }
-      else { // nothing on the right
-        return null;
-      }
-    }
-    else { // sibLetter == letter
-      return this;
+    else { // nothing on the left
+      return null;
     }
   }
-
+  else if (sibLetter > this.letter) {
+    if (this.right != null) {
+      return this.right.findSibling(sibLetter);
+    }
+    else { // nothing on the right
+      return null;
+    }
+  }
+  else { // sibLetter == letter
+    return this;
+  }
 }
