@@ -18,7 +18,9 @@ function loadDict() {
 
 function main(data) {
   var start = new Date();
-  var tst = new TST(data.split('\n'));
+  var wordList = data.split('\n');
+  wordList.pop(); // delete the extra new line at end
+  var tst = new TST(wordList);
   var end = new Date();
   console.log('Building dictionary time elapsed: ' + String(end - start));
   console.log('Nodes: ' + String(tst.getRoot().countNodes()));
