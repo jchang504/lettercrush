@@ -76,18 +76,7 @@ function Game(aName, aMyTurn, aBoard, blockedWords, aTst) {
    * timeLimit seconds
    */
   this.findBestMoves = function(depth, timeLimit) {
-    /*
-    var count = 0;
     var endTime = new Date().getTime() + 1000*timeLimit;
-    for (var i = 0; i < 1000000000; i++) {
-      if (count % 1000000 == 0 && new Date().getTime() >= endTime) {
-        console.log('Timed out.');
-        break;
-      }
-      count++;
-    }
-    console.log(count);
-    */
     bestMoves = new Array(BEST_MOVES_LEN);
     bestMovesValue = new Array(BEST_MOVES_LEN);
     for (var i = 0; i < BEST_MOVES_LEN; i++) {
@@ -108,7 +97,12 @@ function Game(aName, aMyTurn, aBoard, blockedWords, aTst) {
     // evaluate and find the top 10
     var start = new Date();
     var startState = new GameState(myTurn, board, []);
+    var count = 0;
     for (var i = 0; i < movesList.length; i++) {
+      if (count % 100 == 0 && new Date().getTime() > endTime) {
+        console.log('Timed out.');
+        break;
+      }
       var move = movesList[i];
       var moveValue = startState.valueMove(move, movesList, depth, BOARD_MIN, BOARD_MAX);
       var insertIndex = BEST_MOVES_LEN;
@@ -124,6 +118,7 @@ function Game(aName, aMyTurn, aBoard, blockedWords, aTst) {
         bestMoves[insertIndex] = move;
         bestMovesValue[insertIndex] = moveValue;
       }
+      count++;
     }
     var end = new Date();
     console.log('Selecting bestMoves took: ' + String(end - start));
@@ -220,57 +215,39 @@ GameState.prototype.valueMove = function(move, movesList, depth, alpha, beta) {
   var nextState = this.clone();
   nextState.playMove(move);
   if (depth == 0) { // use heuristic
-    return nextState.valueBoard();
+    var heuristic = nextState.valueBoard();
+    if (heuristic <= alpha) {
+      return nextState.myTurn ? "PP" : "P";
+    }
+    else if (heuristic >= beta) {
+      return nextState.myTurn ? "P" : "PP";
+    }
+    else {
+      return heuristic;
+    }
   }
   else {
-    if (nextState.myTurn) {
-      for (var i = 0; i < movesList.length; i++) {
-        // if not already played
-        if (nextState.playedWords.indexOf(movesList[i]) == -1) {
-          var value = nextState.valueMove(movesList[i], movesList, depth-1, alpha, beta);
-          if (value === "PP") { // received parent prune
-            return "P";
+    for (var i = 0; i < movesList.length; i++) {
+      // if not already played
+      if (nextState.playedWords.indexOf(nextState.convertToWord(movesList[i])) == -1) {
+        var value = nextState.valueMove(movesList[i], movesList, depth-1, alpha, beta);
+        if (value === "PP") { // received parent prune
+          return "P";
+        }
+        else if (value === "P") { // received prune
+          // do nothing; just skip this move
+        }
+        else { // update alpha/beta
+          if (nextState.myTurn) {
+            alpha = Math.max(alpha, value);
           }
-          else if (value === "P") { // received prune
-            // do nothing; just skip this move
-          }
-          else if (value < alpha) {
-            return "PP"; // return parent prune
-          }
-          else if (value > beta) {
-            return "P"; // return prune
-          }
-          else { // alpha < value < beta
-            alpha = value;
+          else {
+            beta = Math.min(beta, value);
           }
         }
       }
-      return alpha;
     }
-    else { // opponent's turn
-      for (var i = 0; i < movesList.length; i++) {
-        // if not already played
-        if (nextState.playedWords.indexOf(movesList[i]) == -1) {
-          var value = nextState.valueMove(movesList[i], movesList, depth-1, alpha, beta);
-          if (value === "PP") { // received parent prune
-            return "P";
-          }
-          else if (value === "P") { // received prune
-            // do nothing; just skip this move
-          }
-          else if (value > beta) {
-            return "PP"; // return parent prune
-          }
-          else if (value < alpha) {
-            return "P"; // return prune
-          }
-          else { // alpha < value < beta
-            beta = value;
-          }
-        }
-      }
-      return beta;
-    }
+    return nextState.myTurn ? alpha : beta;
   }
 }
 

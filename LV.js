@@ -10,7 +10,7 @@ function loadGame() {
 // load the dictionary file
 function loadDict() {
   $('#load-dict').css('display', 'block');
-  $.get('dictionary.dat', function(data) { // TST is 607490 nodes
+  $.get('testdictionary.dat', function(data) { // TST is 607490 nodes
     $('#done-dict').css('display', 'block');
     main(data);
   });
@@ -34,7 +34,7 @@ function main(data) {
   }
   var game = new Game('test', true, testBoard, [], tst);
   start = new Date();
-  game.findBestMoves(1, 30);
+  game.findBestMoves(1, 10);
   end = new Date();
   console.log('findBestMoves took: ' + String(end - start));
 }
