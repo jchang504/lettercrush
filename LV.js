@@ -32,9 +32,9 @@ function main(data) {
   for (var i = 0; i < 25; i++) {
     testBoard[i] = [testLetters[i], 0];
   }
-  var game = new Game('test', true, testBoard, ['praiseworthy', 'orthopterist'], tst);
+  var game = new Game('test', true, testBoard, [], tst);
   start = new Date();
-  game.findBestMoves(30);
+  game.findBestMoves(1, 30);
   end = new Date();
   console.log('findBestMoves took: ' + String(end - start));
 }

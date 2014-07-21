@@ -69,10 +69,13 @@ function Game(aName, aMyTurn, aBoard, blockedWords, aTst) {
   }
 
   /* Find and set the bestMoves
-   * REQUIRES: timeLimit is a time limit in seconds (minimum 1)
-   * ENSURES: finds and sets the bestMoves within at most timeLimit seconds
+   * REQUIRES: depth is the goal depth to search to; timeLimit is a time
+   * limit in seconds (minimum 1)
+   * ENSURES: finds and sets the bestMoves using minimax with alpha-beta
+   * pruning up to depth plies, or as far as it can get within at most
+   * timeLimit seconds
    */
-  this.findBestMoves = function(timeLimit) {
+  this.findBestMoves = function(depth, timeLimit) {
     /*
     var count = 0;
     var endTime = new Date().getTime() + 1000*timeLimit;
@@ -104,10 +107,10 @@ function Game(aName, aMyTurn, aBoard, blockedWords, aTst) {
     console.log('movesList generation took: ' + String(end - start));
     // evaluate and find the top 10
     var start = new Date();
-    var startState = new GameState(true, board, []);
+    var startState = new GameState(myTurn, board, []);
     for (var i = 0; i < movesList.length; i++) {
       var move = movesList[i];
-      var moveValue = startState.valueMove(move);
+      var moveValue = startState.valueMove(move, movesList, depth, BOARD_MIN, BOARD_MAX);
       var insertIndex = BEST_MOVES_LEN;
       for (var j = BEST_MOVES_LEN-1; j >= 0; j--) {
         if (moveValue > bestMovesValue[j]) {
@@ -207,13 +210,68 @@ function GameState(aMyTurn, aBoard, aPlayedWords) {
 
 }
 
-/* REQUIRES: move is a bit (number) array of length 25
- * ENSURES: returns the value of the board after this move
+/* Uses alpha-beta pruned minimax to determine the value of the move
+ * REQUIRES: move is a bit (number) array of length 25, movesList is the
+ * array of available moves, depth is the desired search depth, alpha and * beta are the lower/upper bounds
+ * ENSURES: returns the minimax value of this move
  */
-GameState.prototype.valueMove = function(move) {
-  var stateClone = this.clone();
-  stateClone.playMove(move);
-  return stateClone.valueBoard();
+GameState.prototype.valueMove = function(move, movesList, depth, alpha, beta) {
+  // clone the state and play the move
+  var nextState = this.clone();
+  nextState.playMove(move);
+  if (depth == 0) { // use heuristic
+    return nextState.valueBoard();
+  }
+  else {
+    if (nextState.myTurn) {
+      for (var i = 0; i < movesList.length; i++) {
+        // if not already played
+        if (nextState.playedWords.indexOf(movesList[i]) == -1) {
+          var value = nextState.valueMove(movesList[i], movesList, depth-1, alpha, beta);
+          if (value === "PP") { // received parent prune
+            return "P";
+          }
+          else if (value === "P") { // received prune
+            // do nothing; just skip this move
+          }
+          else if (value < alpha) {
+            return "PP"; // return parent prune
+          }
+          else if (value > beta) {
+            return "P"; // return prune
+          }
+          else { // alpha < value < beta
+            alpha = value;
+          }
+        }
+      }
+      return alpha;
+    }
+    else { // opponent's turn
+      for (var i = 0; i < movesList.length; i++) {
+        // if not already played
+        if (nextState.playedWords.indexOf(movesList[i]) == -1) {
+          var value = nextState.valueMove(movesList[i], movesList, depth-1, alpha, beta);
+          if (value === "PP") { // received parent prune
+            return "P";
+          }
+          else if (value === "P") { // received prune
+            // do nothing; just skip this move
+          }
+          else if (value > beta) {
+            return "PP"; // return parent prune
+          }
+          else if (value < alpha) {
+            return "P"; // return prune
+          }
+          else { // alpha < value < beta
+            beta = value;
+          }
+        }
+      }
+      return beta;
+    }
+  }
 }
 
 GameState.prototype.valueBoard = function() {
