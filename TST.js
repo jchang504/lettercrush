@@ -97,63 +97,43 @@ function TST(dictionary) {
     return temp.endsWord;
   }
 
-  /* Deletes a word from the TST and adds it to the blocked list
+  /* Deletes a word and its prefixes from the TST and adds them to the blocked
+  * list
    * REQUIRES: word is a string of length >= 1
-   * ENSURES: if the word is in the TST, removes it and adds it to the blocked
-   * list
+   * ENSURES: if the word is in the TST, removes it and its prefixes and adds
+   * them to the blocked list
    */
   this.block = function(word) {
     var i = 0;
-    var targetNode = root;
-    var parentNode, relation;
-    var subword = ''; // for blocking prefixes as well
+    var curr = root;
+    var toBlock = [];
+    var prefix = ''; // for blocking prefixes as well
     while (i < word.length) {
-      if (targetNode == null) {
+      if (curr == null) {
         return;
       }
       var wordLetter = word.substring(i,i+1);
-      if (wordLetter < targetNode.letter) {
-        relation = -1;
-        parentNode = targetNode;
-        targetNode = targetNode.left;
+      if (wordLetter < curr.letter) {
+        curr = curr.left;
       }
-      else if (wordLetter > targetNode.letter) {
-        relation = 1;
-        parentNode = targetNode;
-        targetNode = targetNode.right;
+      else if (wordLetter > curr.letter) {
+        curr = curr.right;
       }
-      else { // wordLetter == targetNode.letter
+      else { // wordLetter == curr.letter
+        prefix += wordLetter;
+        if (curr.endsWord) {
+          toBlock.push([curr, prefix]); // queue this node for blocking
+        }
         if (i < word.length - 1) { // if not on the last letter
-          subword += wordLetter;
-          if (targetNode.endsWord) { // block prefix word
-            this.block(subword);
-          }
-          relation = 0; // continue on
-          parentNode = targetNode;
-          targetNode = targetNode.next;
+          curr = curr.next;
         }
         i++;
       }
     }
-    // now targetNode, parentNode, and relation are set correctly
-    // check if targetNode is a total leaf
-    if (targetNode.left == null && targetNode.right == null && targetNode.next == null) {
-      switch(relation) { // remove it from tree
-        case -1:
-          parentNode.left = null;
-          break;
-        case 0:
-          parentNode.next = null;
-          break;
-        case 1:
-          parentNode.right = null;
-          break;
-      }
+    for (var j = 0; j < toBlock.length; j++) {
+      toBlock[j][0].endsWord = false; // remove node's endsWord
+      blocked.push(toBlock[j][1]); // add word to blocked list
     }
-    else { // targetNode is not a leaf
-      targetNode.endsWord = false;
-    }
-    blocked.push(word);
   }
 
   // unblocks (inserts) all blocked words

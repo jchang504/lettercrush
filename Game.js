@@ -95,8 +95,6 @@ function Game(aName, aMyTurn, aBoard, aBlockedWords, aTst) {
    */
   this.findBestMoves = function(lookahead, timeLimit, listLen) {
     var movesList = currMovesList; // set initial moves list
-    console.log('finding in list: ' + String(movesList.length));
-    var start = new Date();
     var endTime = new Date().getTime() + 1000*timeLimit;
     var layerMaxTime;
     // use IDDFS
@@ -104,8 +102,7 @@ function Game(aName, aMyTurn, aBoard, aBlockedWords, aTst) {
       if (depth > 0 && new Date().getTime() > endTime - layerMaxTime) {
         break;
       }
-      console.log('Depth: ' + String(depth));
-      var bestMovesLen = Math.max(Math.floor(Math.sqrt(movesList.length)), 10);
+      var bestMovesLen = Math.max(Math.floor(Math.sqrt(movesList.length)), listLen);
       bestMoves = new Array(bestMovesLen);
       bestMovesValue = new Array(bestMovesLen);
       for (var i = 0; i < bestMovesLen; i++) {
@@ -132,8 +129,7 @@ function Game(aName, aMyTurn, aBoard, aBlockedWords, aTst) {
       // 80 is approximately how many heuristic evals can be done per ms
     }
     // trim to desired length
-    bestMoves.length = Math.min(bestMoves.length, listLen);
-    var end = new Date();
+    bestMoves.length = listLen;
     for (var i = 0; i < bestMoves.length; i++) {
       console.log(bestMoves[i]);
     }

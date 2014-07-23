@@ -32,7 +32,7 @@ function main(data) {
   for (var i = 0; i < 25; i++) {
     testBoard[i] = [testLetters[i], 0];
   }
-  var game = new Game('test', true, testBoard, [], tst);
+  var game = new Game('test', true, testBoard, ['praiseworthy'], tst);
   start = new Date();
   game.findBestMoves(4, 5, 10);
   end = new Date();
