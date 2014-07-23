@@ -148,9 +148,6 @@ function Game(aName, aMyTurn, aBoard, aBlockedWords, aTst) {
    * according to its value, and returns the updated lastIndex
    */
   function binInsert(move, moveValue, lastIndex) {
-    if (moveValue == 'PP' || moveValue == 'P') {
-      console.log('moveValue at top is: ' + moveValue);
-    }
     if (lastIndex == -1) { // no moves yet
       bestMoves[0] = move;
       bestMovesValue[0] = moveValue;
@@ -271,6 +268,7 @@ function GameState(aMyTurn, aBoard, aPlayedWords) {
   this.myTurn = aMyTurn;
   this.board = aBoard;
   this.playedWords = aPlayedWords;
+  this.over = 0; // game is not over yet
 
 }
 
@@ -283,7 +281,10 @@ GameState.prototype.valueMove = function(move, movesList, depth, alpha, beta) {
   // clone the state and play the move
   var nextState = this.clone();
   nextState.playMove(move);
-  if (depth == 0) { // use heuristic
+  if (nextState.over != 0) { // if nextState is game over
+    return nextState.over * BOARD_MAX;
+  }
+  else if (depth == 0) { // use heuristic
     var heuristic = nextState.valueBoard();
     if (heuristic <= alpha) {
       return nextState.myTurn ? "PP" : "P";
@@ -296,7 +297,6 @@ GameState.prototype.valueMove = function(move, movesList, depth, alpha, beta) {
     }
   }
   else {
-    var allPruned = true; // a hack to fix the "150 problem"
     for (var i = 0; i < movesList.length; i++) {
       // if not already played
       if (nextState.playedWords.indexOf(nextState.convertToWord(movesList[i])) == -1) {
@@ -318,12 +318,7 @@ GameState.prototype.valueMove = function(move, movesList, depth, alpha, beta) {
         }
       }
     }
-    if (allPruned) {
-      return "PP";
-    }
-    else {
-      return nextState.myTurn ? alpha : beta;
-    }
+    return nextState.myTurn ? alpha : beta;
   }
 }
 
@@ -368,7 +363,9 @@ GameState.prototype.playMove = function(move) {
 
 // private methods
 
+// Updates the colors of the tiles, AND marks the game if it's over
 GameState.prototype.updateColors = function() {
+  var blueCount = 0, redCount = 0;
   for (var r = 0; r < 5; r++)
   {
     for (var c = 0; c < 5; c++) {
@@ -384,7 +381,21 @@ GameState.prototype.updateColors = function() {
         else {
           this.board[5*r+c][1] = (myColor > 0) ? 2 : -2;
         }
+        if (myColor > 0) {
+          blueCount++;
+        }
+        else { // since myColor != 0, myColor < 0
+          redCount++;
+        }
       }
+    }
+  }
+  if (blueCount + redCount == 25) {
+    if (blueCount >= 13) { // majority blue
+      this.over = 1; // blue won
+    }
+    else { // majority red
+      this.over = -1; // red won
     }
   }
 }
