@@ -285,36 +285,22 @@ GameState.prototype.valueMove = function(move, movesList, depth, alpha, beta) {
     return nextState.over * BOARD_MAX;
   }
   else if (depth == 0) { // use heuristic
-    var heuristic = nextState.valueBoard();
-    if (heuristic <= alpha) {
-      return nextState.myTurn ? "PP" : "P";
-    }
-    else if (heuristic >= beta) {
-      return nextState.myTurn ? "P" : "PP";
-    }
-    else {
-      return heuristic;
-    }
+    return nextState.valueBoard();
   }
   else {
     for (var i = 0; i < movesList.length; i++) {
       // if not already played
       if (nextState.playedWords.indexOf(nextState.convertToWord(movesList[i])) == -1) {
         var value = nextState.valueMove(movesList[i], movesList, depth-1, alpha, beta);
-        if (value === "PP") { // received parent prune
-          return "P";
+        if (nextState.myTurn) {
+          alpha = Math.max(alpha, value);
         }
-        else if (value === "P") { // received prune
-          // do nothing; just skip this move
+        else {
+          beta = Math.min(beta, value);
         }
-        else { // update alpha/beta
-          if (nextState.myTurn) {
-            alpha = Math.max(alpha, value);
-          }
-          else {
-            beta = Math.min(beta, value);
-          }
-          allPruned = false;
+        // check if bounds have crossed
+        if (beta <= alpha) {
+          break;
         }
       }
     }
@@ -322,25 +308,13 @@ GameState.prototype.valueMove = function(move, movesList, depth, alpha, beta) {
   }
 }
 
+// sums up the color values of the tiles; does NOT detect game over
 GameState.prototype.valueBoard = function() {
-  var blueCount = 0, redCount = 0;
   var sum = 0;
   for (var i = 0; i < 25; i++) {
-    var color = this.board[i][1];
-    if (color > 0) {
-      blueCount++;
-    }
-    else if (color < 0) {
-      redCount++;
-    }
-    sum += color;
+    sum += this.board[i][1];
   }
-  if (blueCount + redCount == 25) { // if game is over
-    return blueCount > redCount ? BOARD_MAX : BOARD_MIN;
-  }
-  else {
-    return sum;
-  }
+  return sum;
 }
 
 /* move is a 25-array, filled from the left with the positions of the
@@ -363,7 +337,7 @@ GameState.prototype.playMove = function(move) {
 
 // private methods
 
-// Updates the colors of the tiles, AND marks the game if it's over
+// updates the colors of the tiles, AND marks the game if it's over
 GameState.prototype.updateColors = function() {
   var blueCount = 0, redCount = 0;
   for (var r = 0; r < 5; r++)
