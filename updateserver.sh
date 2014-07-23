@@ -1,3 +1,3 @@
 #!/bin/bash
 
-sudo cp LV.js Game.js TST.js tester.html testdictionary.dat /var/www/html
+sudo cp lettercrush.html lettercrush-style.css run-lettercrush.js process-access.php /var/www/html
