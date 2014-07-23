@@ -3,7 +3,6 @@
 // global constant variable
 BOARD_MAX = 50;
 BOARD_MIN = -50;
-BEST_MOVES_LEN = 10;
 
 /* constructor for a Game
  * REQUIRES: aName is a string, aMyTurn is a boolean, aBoard is a valid
@@ -12,27 +11,46 @@ BEST_MOVES_LEN = 10;
  * been played, and aDate is the current date (a Date object)
  * ENSURES: returns a Game representing these facts
  */
-function Game(aName, aMyTurn, aBoard, blockedWords, aTst) {
+function Game(aName, aMyTurn, aBoard, aBlockedWords, aTst) {
   // public variables
   this.name = aName;
   // private variables
   var date = new Date();
   var myTurn = aMyTurn;
   var board = aBoard;
+  var blockedWords = aBlockedWords;
   var tst = aTst;
+  var currMovesList;
   var bestMoves = null;
   var bestMoveValues = null;
   // block initial words in TST
   for (var i = 0; i < blockedWords.length; i++) {
     tst.block(blockedWords[i]);
   }
+  // generate move list
+  var start = new Date();
+  var alphaPool = mapTileLocations();
+  var move = new Array(25);
+  for (var i = 0; i < 25; i++) {
+    move[i] = -1;
+  }
+  currMovesList = findMoves(tst.getRoot(), alphaPool, move, 0);
+  var end = new Date();
+  console.log('currMovesList.length: ' + String(currMovesList.length));
+  console.log('currMovesList generation took: ' + String(end - start));
 
   // Getters
+  this.getDate = function() {
+    return date;
+  }
   this.isMyTurn = function() {
     return myTurn;
   }
   this.getBoard = function() {
     return board;
+  }
+  this.getBestMoves = function() {
+    return bestMoves;
   }
 
   //temporary
@@ -64,70 +82,118 @@ function Game(aName, aMyTurn, aBoard, blockedWords, aTst) {
     var state = new GameState(myTurn, board, []);
     state.playMove(move);
     board = state.board; // update board
-    tst.block(state.playedWords[0]); // block word in TST
     myTurn = !myTurn; // change turns
+    removeCurrMoves(state.playedWords[0]); // remove word from move list
   }
 
   /* Find and set the bestMoves
-   * REQUIRES: depth is the goal depth to search to; timeLimit is a time
-   * limit in seconds (minimum 1)
+   * REQUIRES: lookahead is the desired lookahead (min 1); timeLimit is a
+   * time limit in seconds (min 1); listLen is the desired length of final list
    * ENSURES: finds and sets the bestMoves using minimax with alpha-beta
-   * pruning up to depth plies, or as far as it can get within at most
+   * pruning up to lookahead plies, or as far as it can get within at most
    * timeLimit seconds
    */
-  this.findBestMoves = function(depth, timeLimit) {
+  this.findBestMoves = function(lookahead, timeLimit, listLen) {
+    var movesList = currMovesList; // set initial moves list
+    console.log('finding in list: ' + String(movesList.length));
+    var start = new Date();
     var endTime = new Date().getTime() + 1000*timeLimit;
-    bestMoves = new Array(BEST_MOVES_LEN);
-    bestMovesValue = new Array(BEST_MOVES_LEN);
-    for (var i = 0; i < BEST_MOVES_LEN; i++) {
-      bestMoves[i] = null;
-      bestMovesValue[i] = BOARD_MIN;
-    }
-    var start = new Date();
-    var alphaPool = mapTileLocations();
-    var move = new Array(25);
-    for (var i = 0; i < 25; i++) {
-      move[i] = -1;
-    }
-    // generate moves
-    var movesList = findMoves(tst.getRoot(), alphaPool, move, 0);
-    var end = new Date();
-    console.log('movesList.length: ' + String(movesList.length));
-    console.log('movesList generation took: ' + String(end - start));
-    // evaluate and find the top 10
-    var start = new Date();
-    var startState = new GameState(myTurn, board, []);
-    var count = 0;
-    for (var i = 0; i < movesList.length; i++) {
-      if (count % 100 == 0 && new Date().getTime() > endTime) {
-        console.log('Timed out.');
+    var layerMaxTime;
+    // use IDDFS
+    for (var depth = 0; depth < lookahead; depth++) {
+      if (depth > 0 && new Date().getTime() > endTime - layerMaxTime) {
         break;
       }
-      var move = movesList[i];
-      var moveValue = startState.valueMove(move, movesList, depth, BOARD_MIN, BOARD_MAX);
-      var insertIndex = BEST_MOVES_LEN;
-      for (var j = BEST_MOVES_LEN-1; j >= 0; j--) {
-        if (moveValue > bestMovesValue[j]) {
-          insertIndex--;
-        }
-        else { // once it's less, break because the rest are higher
+      console.log('Depth: ' + String(depth));
+      var bestMovesLen = Math.max(Math.floor(Math.sqrt(movesList.length)), 10);
+      bestMoves = new Array(bestMovesLen);
+      bestMovesValue = new Array(bestMovesLen);
+      for (var i = 0; i < bestMovesLen; i++) {
+        bestMovesValue[i] = BOARD_MIN;
+      }
+      var startState = new GameState(myTurn, board, []);
+      var lastIndex = -1;
+      var count = 0;
+      var modulus = depth == 0 ? 1000 : 10;
+      for (var i = 0; i < movesList.length; i++) {
+        if (count % modulus == 0 && new Date().getTime() > endTime) {
           break;
         }
+        var move = movesList[i];
+        // use lowest best move value as alpha
+        var moveValue = startState.valueMove(move, movesList, depth, bestMovesValue[bestMovesLen-1], BOARD_MAX);
+        // insert into best list if needed, and update lastIndex
+        lastIndex = binInsert(move, moveValue, lastIndex);
+        count++;
       }
-      if (insertIndex < BEST_MOVES_LEN) {
-        bestMoves[insertIndex] = move;
-        bestMovesValue[insertIndex] = moveValue;
-      }
-      count++;
+      movesList = bestMoves; // use bestMoves as movesList for next layer
+      // recalculate layer timeout threshold
+      layerMaxTime = listLen * Math.pow(movesList.length, depth+1) / 80;
+      // 80 is approximately how many heuristic evals can be done per ms
     }
+    // trim to desired length
+    bestMoves.length = Math.min(bestMoves.length, listLen);
     var end = new Date();
-    console.log('Selecting bestMoves took: ' + String(end - start));
-    for (var i = 0; i < BEST_MOVES_LEN; i++) {
+    for (var i = 0; i < bestMoves.length; i++) {
       console.log(bestMoves[i]);
     }
   }
 
   // private helper methods for findBestMoves
+
+  /* REQUIRES: move is a move with value moveValue, (bestMoves is sorted in
+   * descending order by move values,) and lastIndex is the index of the last
+   * (worst) move in bestMoves
+   * ENSURES: Inserts the move into bestMoves at the appropriate spot
+   * according to its value, and returns the updated lastIndex
+   */
+  function binInsert(move, moveValue, lastIndex) {
+    if (lastIndex == -1) { // no moves yet
+      bestMoves[0] = move;
+      bestMovesValue[0] = moveValue;
+      return ++lastIndex;
+    }
+    else if (moveValue <= bestMovesValue[lastIndex]) { // can't beat bottom move
+      if (lastIndex + 1 < bestMoves.length) { // if empty spaces left
+        bestMoves[lastIndex+1] = move;
+        bestMovesValue[lastIndex+1] = moveValue;
+        return ++lastIndex;
+      }
+      else { // don't insert; return same index
+        return lastIndex;
+      }
+    }
+    else { // beats move at lastIndex; use bin search to find index to insert
+      var maxIndex = 0; // lowest index this move could be inserted at
+      var minIndex = lastIndex; // highest index || ...
+      while (maxIndex < minIndex) {
+        var mid = Math.floor((maxIndex + minIndex) / 2);
+        if (moveValue <= bestMovesValue[mid]) {
+          maxIndex = mid+1;
+        }
+        else { // moveValue > bestMovesValue[mid]
+          minIndex = mid;
+        }
+      }
+      // now maxIndex == minIndex
+      bestMoves.splice(maxIndex, 0, move);
+      bestMovesValue.splice(maxIndex, 0, moveValue);
+      bestMoves.length--; // reset length
+      return ++lastIndex;
+    }
+  }
+
+  /*
+   * Removes all occurrences of this word and its prefixeds from the movesList
+   */
+  function removeCurrMoves(word) {
+    var state = new GameState(myTurn, board, []);
+    for (var i = 0; i < currMovesList.length; i++) {
+      if (word.indexOf(state.convertToWord(currMovesList[i])) != -1) {
+        currMovesList.splice(i, 1); // remove this word
+      }
+    }
+  }
 
   /* REQUIRES: tstNode is the desired starting node, alphaPool is a pool
    * of letters mapped to positions by mapTileLocations, move is the move
