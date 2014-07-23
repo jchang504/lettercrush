@@ -148,6 +148,9 @@ function Game(aName, aMyTurn, aBoard, aBlockedWords, aTst) {
    * according to its value, and returns the updated lastIndex
    */
   function binInsert(move, moveValue, lastIndex) {
+    if (moveValue == 'PP' || moveValue == 'P') {
+      console.log('moveValue at top is: ' + moveValue);
+    }
     if (lastIndex == -1) { // no moves yet
       bestMoves[0] = move;
       bestMovesValue[0] = moveValue;
@@ -293,6 +296,7 @@ GameState.prototype.valueMove = function(move, movesList, depth, alpha, beta) {
     }
   }
   else {
+    var allPruned = true; // a hack to fix the "150 problem"
     for (var i = 0; i < movesList.length; i++) {
       // if not already played
       if (nextState.playedWords.indexOf(nextState.convertToWord(movesList[i])) == -1) {
@@ -310,19 +314,38 @@ GameState.prototype.valueMove = function(move, movesList, depth, alpha, beta) {
           else {
             beta = Math.min(beta, value);
           }
+          allPruned = false;
         }
       }
     }
-    return nextState.myTurn ? alpha : beta;
+    if (allPruned) {
+      return "PP";
+    }
+    else {
+      return nextState.myTurn ? alpha : beta;
+    }
   }
 }
 
 GameState.prototype.valueBoard = function() {
+  var blueCount = 0, redCount = 0;
   var sum = 0;
   for (var i = 0; i < 25; i++) {
-    sum += this.board[i][1];
+    var color = this.board[i][1];
+    if (color > 0) {
+      blueCount++;
+    }
+    else if (color < 0) {
+      redCount++;
+    }
+    sum += color;
   }
-  return sum;
+  if (blueCount + redCount == 25) { // if game is over
+    return blueCount > redCount ? BOARD_MAX : BOARD_MIN;
+  }
+  else {
+    return sum;
+  }
 }
 
 /* move is a 25-array, filled from the left with the positions of the

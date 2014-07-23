@@ -106,6 +106,7 @@ function TST(dictionary) {
     var i = 0;
     var targetNode = root;
     var parentNode, relation;
+    var subword = ''; // for blocking prefixes as well
     while (i < word.length) {
       if (targetNode == null) {
         return;
@@ -122,8 +123,12 @@ function TST(dictionary) {
         targetNode = targetNode.right;
       }
       else { // wordLetter == targetNode.letter
-        if (i < word.length - 1) { // continue on
-          relation = 0;
+        if (i < word.length - 1) { // if not on the last letter
+          subword += wordLetter;
+          if (targetNode.endsWord) { // block prefix word
+            this.block(subword);
+          }
+          relation = 0; // continue on
           parentNode = targetNode;
           targetNode = targetNode.next;
         }
