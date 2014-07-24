@@ -1,13 +1,17 @@
 /* stylesheet for Lettercrush */
 
-.centered-block {
+.page {
+  width: 800px;
   margin: 0 auto;
-}
-
-.center-text {
   text-align: center;
 }
 
+/* hide until JS-enabled is confirmed */
+#no-storage {
+  display: none;
+}
+
+/* hide until HTML5 Web Storage is confirmed */
 #yes-storage {
   display: none;
 }
@@ -15,4 +19,39 @@
 #denied {
   display: none;
   color: red;
+}
+
+#loading {
+  display: none;
+  position: fixed;
+  height: 100%;
+  width: 100%;
+  text-align: center;
+  cursor: progress;
+}
+
+#games { /* The game selection page */
+  display: none;
+}
+
+#board-preview {
+  float: left;
+  border-collapse: collapse;
+}
+
+#board-preview td {
+  height: 50px;
+  width: 50px;
+  border: 1px solid black;
+}
+
+#game-select-form {
+  float: right;
+  text-align: left;
+  font-size: 1.5em;
+  overflow: auto;
+}
+
+#game-select-form label {
+  font-size: 0.7em;
 }

@@ -6,10 +6,13 @@ $(document).ready(checkStorage);
 
 function checkStorage() {
   if (DEBUG) { console.log('CALL checkStorage'); }
+  $('#nojs').css('display', 'none'); // remove No JS message
   if (typeof(Storage) !== "undefined") { // check if Web Storage supported
-    $('#no-storage').css('display', 'none');
     $('#yes-storage').css('display', 'block');
     checkAccess();
+  }
+  else {
+    $('#no-storage').css('display', 'block');
   }
 }
 
@@ -17,7 +20,7 @@ function checkStorage() {
 function checkAccess() {
   if (DEBUG) { console.log('CALL checkAccess'); }
   $('#access-form').submit(function(e) {
-    if (DEBUG) { console.log('form submitted'); }
+    e.preventDefault(); // prevent default form action
     var code = $('input[name="access-code"]').val();
     if (DEBUG) { console.log('Submit access code button clicked with value: ' + code); }
     $.post('process-access.php', {'accessCode': code}, function(response) {
@@ -30,13 +33,16 @@ function checkAccess() {
         $('input[name="access-code"]').val('');
       }
     });
-    return false; // prevent default form action
   });
 }
 
 // beginning of actual AI code
 function loadTST() {
   if (DEBUG) { console.log('CALL loadTST'); }
+  $('#title').css('display', 'none'); // hide title page
+  // show loading dictionary page
+  $('#loading > h1').html('Loading dictionary...');
+  $('#loading').css('display', 'block');
   $.getScript('TST.js', loadGame);
 }
 
@@ -52,9 +58,20 @@ function loadDict() {
 
 function main(data) {
   if (DEBUG) { console.log('CALL main'); }
+  $('#loading').css('display', 'none'); // hide loading page
+  if (DEBUG) {
+    var testList = ['John', 'Rohit'];
+    localStorage.setItem('gamelist', JSON.stringify(testList));
+  }
+  var gameList = JSON.parse(localStorage.getItem('gamelist'));
+  for (var i = 0; i < gameList.length; i++) {
+    $('#game-select-form').prepend('<input type="radio" name="game-selected" value="' + gameList[i] + '"> ' + gameList[i] + '<br>');
+  }
+  // set first choice to checked
+  $('#game-select-form > input[type="radio"]:first-child').prop('checked', true);
+  $('#games').css('display', 'block'); // show games page
   var wordList = data.split('\n');
   wordList.pop(); // delete the extra new line at end
   var tst = new TST(wordList);
   console.log('Dictionary built.');
-
 }

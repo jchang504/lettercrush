@@ -11,11 +11,11 @@ BOARD_MIN = -50;
  * been played, and aDate is the current date (a Date object)
  * ENSURES: returns a Game representing these facts
  */
-function Game(aName, aMyTurn, aBoard, aBlockedWords, aTst) {
+function Game(aName, aDate, aMyTurn, aBoard, aBlockedWords, aTst) {
   // public variables
   this.name = aName;
   // private variables
-  var date = new Date();
+  var date = aDate;
   var myTurn = aMyTurn;
   var board = aBoard;
   var blockedWords = aBlockedWords;
