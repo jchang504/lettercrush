@@ -16,8 +16,9 @@ function checkStorage() {
 // Adds handler for checking access code when the Go button is clicked
 function checkAccess() {
   if (DEBUG) { console.log('CALL checkAccess'); }
-  $('#submit-access').click(function() {
-    var code = $('input[name="access-code"]').attr('value');
+  $('#access-form').submit(function(e) {
+    if (DEBUG) { console.log('form submitted'); }
+    var code = $('input[name="access-code"]').val();
     if (DEBUG) { console.log('Submit access code button clicked with value: ' + code); }
     $.post('process-access.php', {'accessCode': code}, function(response) {
       if (response == "grant") {
@@ -26,9 +27,10 @@ function checkAccess() {
       else {
         if (DEBUG) { console.log('Access denied.'); }
         $('#denied').css('display', 'block');
-        $('input[name="access-code"]').attr('value', '');
+        $('input[name="access-code"]').val('');
       }
     });
+    return false; // prevent default form action
   });
 }
 
