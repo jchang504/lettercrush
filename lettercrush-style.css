@@ -48,10 +48,8 @@
 #game-select-form {
   float: right;
   text-align: left;
-  font-size: 1.5em;
   overflow: auto;
 }
 
 #game-select-form label {
-  font-size: 0.7em;
 }

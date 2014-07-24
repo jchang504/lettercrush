@@ -23,7 +23,7 @@ function checkAccess() {
     e.preventDefault(); // prevent default form action
     var code = $('input[name="access-code"]').val();
     if (DEBUG) { console.log('Submit access code button clicked with value: ' + code); }
-    $.post('process-access.php', {'accessCode': code}, function(response) {
+    $.post('process-access.php', {accessCode: code}, function(response) {
       if (response == "grant") {
         loadTST();
       }
@@ -58,20 +58,32 @@ function loadDict() {
 
 function main(data) {
   if (DEBUG) { console.log('CALL main'); }
-  $('#loading').css('display', 'none'); // hide loading page
-  if (DEBUG) {
-    var testList = ['John', 'Rohit'];
-    localStorage.setItem('gamelist', JSON.stringify(testList));
-  }
-  var gameList = JSON.parse(localStorage.getItem('gamelist'));
-  for (var i = 0; i < gameList.length; i++) {
-    $('#game-select-form').prepend('<input type="radio" name="game-selected" value="' + gameList[i] + '"> ' + gameList[i] + '<br>');
-  }
-  // set first choice to checked
-  $('#game-select-form > input[type="radio"]:first-child').prop('checked', true);
-  $('#games').css('display', 'block'); // show games page
   var wordList = data.split('\n');
   wordList.pop(); // delete the extra new line at end
   var tst = new TST(wordList);
   console.log('Dictionary built.');
+  $('#loading').css('display', 'none'); // hide loading page
+
+  var testBoard = new Array(25);
+  for (var i = 0; i < 25; i++) {
+    testBoard[i] = [String.fromCharCode(97+i), 0];
+  }
+
+  //var johnGame = new Game('John', new Date().toDateString(), true, testBoard, [], tst);
+  //var rohitGame = new Game('Rohit', new Date().toDateString(), true, testBoard, [], tst);
+
+  //if (DEBUG) {
+  //  var testList = [johnGame.saveString(), rohitGame.saveString()];
+  //  localStorage.setItem('gamelist', JSON.stringify(testList));
+  //}
+  var gameList = JSON.parse(localStorage.getItem('gamelist'));
+  for (var i = 0; i < gameList.length; i++) {
+    gameList[i] = JSON.parse(gameList[i]); // turn strings into objects
+    var curr = gameList[i];
+    var radio_html = '<input type="radio" name="game-selected" value="' + curr.name + '"> ' + curr.name + '<br>' + (curr.myTurn ? "Your turn" : "Opponent's turn") + '<br><i>Started: ' + curr.date + '</i><br>';
+    $('#game-select-form').prepend(radio_html);
+  }
+  // set first choice to checked
+  $('#game-select-form > input[type="radio"]:first-child').prop('checked', true);
+  $('#games').css('display', 'block'); // show games page
 }

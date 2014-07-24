@@ -12,9 +12,8 @@ BOARD_MIN = -50;
  * ENSURES: returns a Game representing these facts
  */
 function Game(aName, aDate, aMyTurn, aBoard, aBlockedWords, aTst) {
-  // public variables
-  this.name = aName;
   // private variables
+  var name = aName;
   var date = aDate;
   var myTurn = aMyTurn;
   var board = aBoard;
@@ -75,6 +74,11 @@ function Game(aName, aDate, aMyTurn, aBoard, aBlockedWords, aTst) {
   //temporary
 
   // privileged methods
+
+  // produces a string of this Game's essential data to be saved
+  this.saveString = function() {
+    return JSON.stringify({name: name, date: date, myTurn: myTurn, board: board, blocked: blockedWords});
+  }
 
   /* Plays the move on this game, effecting the necessary board changes.
    */
