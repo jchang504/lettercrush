@@ -64,10 +64,10 @@ function main(data) {
   console.log('Dictionary built.');
   $('#loading').css('display', 'none'); // hide loading page
 
-  var testBoard = new Array(25);
-  for (var i = 0; i < 25; i++) {
-    testBoard[i] = [String.fromCharCode(97+i), 0];
-  }
+  //var testBoard = new Array(25);
+  //for (var i = 0; i < 25; i++) {
+  //  testBoard[i] = [String.fromCharCode(97+i), (i%5)-2];
+  //}
 
   //var johnGame = new Game('John', new Date().toDateString(), true, testBoard, [], tst);
   //var rohitGame = new Game('Rohit', new Date().toDateString(), true, testBoard, [], tst);
@@ -77,13 +77,35 @@ function main(data) {
   //  localStorage.setItem('gamelist', JSON.stringify(testList));
   //}
   var gameList = JSON.parse(localStorage.getItem('gamelist'));
-  for (var i = 0; i < gameList.length; i++) {
+  for (var i = gameList.length-1; i >= 0; i--) {
     gameList[i] = JSON.parse(gameList[i]); // turn strings into objects
     var curr = gameList[i];
-    var radio_html = '<input type="radio" name="game-selected" value="' + curr.name + '"> ' + curr.name + '<br>' + (curr.myTurn ? "Your turn" : "Opponent's turn") + '<br><i>Started: ' + curr.date + '</i><br>';
+    var radio_html = '<input type="radio" name="game-selected" value="' + String(i) + '"> ' + curr.name + '<br>' + (curr.myTurn ? "Your turn" : "Opponent's turn") + '<br><i>Started: ' + curr.date + '</i><br>';
     $('#game-select-form').prepend(radio_html);
   }
-  // set first choice to checked
-  $('#game-select-form > input[type="radio"]:first-child').prop('checked', true);
+  // set listeners to show board previews
+  $('#game-select-form > input[name="game-selected"]').change(function() {
+    var selectedVal = $(this).val();
+    if (DEBUG) { console.log('Game with value ' + selectedVal + ' selected'); }
+    if (selectedVal === "new-game") {
+      // insert new game function here
+    }
+    else {
+      var gameIndex = parseInt(selectedVal);
+      var gameBoard = gameList[gameIndex].board;
+      var colors = ['red', 'pink', 'white', 'lightblue', 'blue'];
+      for (var r = 0; r < 5; r++) {
+      var jqRow = $('#board-preview tr:nth-child(' + String(r+1) + ')');
+        for (var c = 0; c < 5; c++) {
+          var jqCell = jqRow.find('td:nth-child(' + String(c+1) + ')');
+          // put the tile's letter in the td
+          jqCell.html(gameBoard[5*r+c][0]);
+          jqCell.css('background-color', colors[gameBoard[5*r+c][1]+2]);
+        }
+      }
+    }
+  });
+  // set first choice to chosen initially
+  $('#game-select-form > input[type="radio"]:first-child').prop('checked', true).change();
   $('#games').css('display', 'block'); // show games page
 }
