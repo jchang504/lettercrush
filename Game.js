@@ -5,10 +5,11 @@ BOARD_MAX = 50;
 BOARD_MIN = -50;
 
 /* constructor for a Game
- * REQUIRES: aName is a string, aMyTurn is a boolean, aBoard is a valid
+ * REQUIRES: aName is a string, aDate is the result of a
+ * new Date().toDateString(), aMyTurn is a boolean, aBoard is a valid
  * board 25-array of tiles (each is an array of [letter, color])),
- * aPlayedMoves is an array of strings representing valid words that have
- * been played, and aDate is the current date (a Date object)
+ * aBlockedWords is an array of strings representing valid words that have
+ * been played, and aTst is the TST to use for this game
  * ENSURES: returns a Game representing these facts
  */
 function Game(aName, aDate, aMyTurn, aBoard, aBlockedWords, aTst) {
