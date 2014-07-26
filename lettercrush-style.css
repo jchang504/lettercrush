@@ -34,12 +34,11 @@
   display: none;
 }
 
-#board-preview {
-  float: left;
+.letter-board {
   border-collapse: collapse;
 }
 
-#board-preview td {
+.letter-board td {
   height: 50px;
   width: 50px;
   border: 1px solid black;
@@ -54,4 +53,12 @@
 #new-name-error {
   display: none;
   color: red;
+}
+
+#play {
+  display: none;
+}
+
+.left-side {
+  float: left;
 }

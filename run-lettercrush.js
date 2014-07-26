@@ -119,20 +119,23 @@ function newGame(name) {
   $('#games').hide(); // hide games page
 }
 
-// opens an existing game for interaction
+/* opens an existing game for interaction
+ * REQUIRES: game is an element of gameData
+ */
 function openGame(game) {
   console.log('Open game ' + game.name);
   $('#games').hide(); // hide games page
   // show the loading page while game sets up move list
-  /* strangely, this hack was the only thing that worked to get the loading
-  page to show up as desired */
-  var loadGame = function() {
-    game = new Game(game.name, game.date, game.myTurn, game.board, game.blocked, tst);
-    $('#loading').hide();
-    console.log('Game data loaded.');
-  }
   $('#loading > h1').html('Loading game data...');
   $('#loading').show();
+  /* strangely, this hack was the only thing that worked to get the loading
+  page to show up as desired. The rest of the code is in this function.*/
+  var loadGame = function() {
+    game = new Game(game.name, game.date, game.myTurn, game.board, game.blocked, tst);
+    console.log('Game data loaded.');
+    $('#loading').hide();
+    $('#play').show(); // bring up the play game page
+  }
   setTimeout(loadGame, 0);
 }
 

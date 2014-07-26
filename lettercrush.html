@@ -37,15 +37,18 @@
     </div><!-- end #title page-->
     <div id="games" class="page">
       <h1>Select a game:</h1>
-      <table id="board-preview">
-        <tbody><!-- Letterpress board - fill with JS-->
-          <tr><td></td><td></td><td></td><td></td><td></td></tr>
-          <tr><td></td><td></td><td></td><td></td><td></td></tr>
-          <tr><td></td><td></td><td></td><td></td><td></td></tr>
-          <tr><td></td><td></td><td></td><td></td><td></td></tr>
-          <tr><td></td><td></td><td></td><td></td><td></td></tr>
-        </tbody>
-      </table>
+      <div class="left-side">
+        <table id="board-preview" class="letter-board">
+          <tbody><!-- Letterpress board - fill with JS-->
+            <tr><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td></td><td></td><td></td><td></td></tr>
+          </tbody>
+        </table>
+        <h2 class="score"><!--score goes here--></h2>
+      </div>
       <form id="game-select-form" action="lettercrush.html">
         <input type="radio" name="game-selected" value="new-game"> New Game<br>
         <label>Name:</label>
@@ -54,5 +57,20 @@
         <span id="new-name-error"></span>
       </form>
     </div><!-- end #games page-->
+    <div id="play" class="page">
+      <h1><!--says whose turn it is--></h1>
+      <div class="left-side">
+        <table id="game-board" class="letter-board">
+          <tbody><!-- Letterpress board - fill with JS-->
+            <tr><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td></td><td></td><td></td><td></td></tr>
+          </tbody>
+        </table>
+        <h2 class="score"><!-- current score goes here --></h2>
+      </div>
+    </div><!-- end #play page-->
   <body>
 </html>

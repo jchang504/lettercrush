@@ -20,6 +20,7 @@ function Game(aName, aDate, aMyTurn, aBoard, aBlockedWords, aTst) {
   var board = aBoard;
   var blockedWords = aBlockedWords;
   var tst = aTst;
+  var currScore;
   var currMovesList;
   var bestMoves = null;
   var bestMoveValues = null;
@@ -40,9 +41,6 @@ function Game(aName, aDate, aMyTurn, aBoard, aBlockedWords, aTst) {
   console.log('currMovesList generation took: ' + String(end - start));
 
   // Getters
-  this.getDate = function() {
-    return date;
-  }
   this.isMyTurn = function() {
     return myTurn;
   }
@@ -52,34 +50,32 @@ function Game(aName, aDate, aMyTurn, aBoard, aBlockedWords, aTst) {
   this.getBestMoves = function() {
     return bestMoves;
   }
-
-  //temporary
-  this.printBoard = function() {
-    var boardString = '';
-    for (var r = 0; r < 5; r++) {
-      boardString += '[';
-      for (var c = 0; c < 5; c++) {
-        var color = board[5*r+c][1];
-        if (color >= 0) {
-          color = '+' + String(color);
-        }
-        else {
-          color = String(color);
-        }
-        boardString += ' ' + color + board[5*r+c][0];
-      }
-      boardString += ' ]\n';
-    }
-    console.log(boardString);
+  this.getCurrScore = function() {
+    return currScore;
   }
-  //temporary
+
+  // updates the current score
+  function calcCurrScore() {
+    currScore = [0, 0];
+    for (var i = 0; i < 25; i++) {
+      var color = board[i][1];
+      if (color > 0) {
+        currScore[0]++; // tally blue tiles
+      }
+      else if (color < 0) {
+        currScore[1]++; // tally red tiles
+      }
+    }
+  }
+  calcCurrScore(); // set initial score
 
   // privileged methods
 
   // produces a string of this Game's essential data to be saved
   this.saveString = function() {
-    return JSON.stringify({name: name, date: date, myTurn: myTurn, board: board, blocked: blockedWords});
+    return JSON.stringify({name: name, date: date, myTurn: myTurn, board: board, blocked: blockedWords, currScore: currScore});
   }
+
 
   /* Plays the move on this game, effecting the necessary board changes.
    */
@@ -89,6 +85,7 @@ function Game(aName, aDate, aMyTurn, aBoard, aBlockedWords, aTst) {
     board = state.board; // update board
     myTurn = !myTurn; // change turns
     removeCurrMoves(state.playedWords[0]); // remove word from move list
+    currScore = calcCurrScore(); // update the score
   }
 
   /* Find and set the bestMoves
@@ -100,6 +97,7 @@ function Game(aName, aDate, aMyTurn, aBoard, aBlockedWords, aTst) {
    */
   this.findBestMoves = function(lookahead, timeLimit, listLen) {
     var movesList = currMovesList; // set initial moves list
+    var fullListLen = movesList.length; // remember full list length
     var endTime = new Date().getTime() + 1000*timeLimit;
     var layerMaxTime;
     // use IDDFS
@@ -107,7 +105,7 @@ function Game(aName, aDate, aMyTurn, aBoard, aBlockedWords, aTst) {
       if (depth > 0 && new Date().getTime() > endTime - layerMaxTime) {
         break;
       }
-      var bestMovesLen = Math.max(Math.floor(Math.sqrt(movesList.length)), listLen);
+      var bestMovesLen = Math.max(Math.floor(Math.pow(fullListLen, (1/(depth+2)))), listLen);
       bestMoves = new Array(bestMovesLen);
       bestMovesValue = new Array(bestMovesLen);
       for (var i = 0; i < bestMovesLen; i++) {
