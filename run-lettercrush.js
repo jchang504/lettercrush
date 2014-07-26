@@ -64,35 +64,46 @@ function main(data) {
   console.log('Dictionary built.');
   $('#loading').css('display', 'none'); // hide loading page
 
-  //var testBoard = new Array(25);
-  //for (var i = 0; i < 25; i++) {
-  //  testBoard[i] = [String.fromCharCode(97+i), (i%5)-2];
-  //}
-
-  //var johnGame = new Game('John', new Date().toDateString(), true, testBoard, [], tst);
-  //var rohitGame = new Game('Rohit', new Date().toDateString(), true, testBoard, [], tst);
-
   //if (DEBUG) {
-  //  var testList = [johnGame.saveString(), rohitGame.saveString()];
+  //  var testBoard = new Array(25);
+  //  for (var i = 0; i < 25; i++) {
+  //    testBoard[i] = [String.fromCharCode(97+i), (i%5)-2];
+  //  }
+
+  //  var johnGame = new Game('John', new Date().toDateString(), true, testBoard, [], tst);
+  //  var rohitGame = new Game('Rohit', new Date().toDateString(), true, testBoard, [], tst);
+  //  localStorage.setItem('John', johnGame.saveString());
+  //  localStorage.setItem('Rohit', rohitGame.saveString());
+  //  var testList = ['John', 'Rohit'];
   //  localStorage.setItem('gamelist', JSON.stringify(testList));
   //}
-  var gameList = JSON.parse(localStorage.getItem('gamelist'));
-  for (var i = gameList.length-1; i >= 0; i--) {
-    gameList[i] = JSON.parse(gameList[i]); // turn strings into objects
-    var curr = gameList[i];
-    var radio_html = '<input type="radio" name="game-selected" value="' + String(i) + '"> ' + curr.name + '<br>' + (curr.myTurn ? "Your turn" : "Opponent's turn") + '<br><i>Started: ' + curr.date + '</i><br>';
-    $('#game-select-form').prepend(radio_html);
-  }
-  // set listeners to show board previews
-  $('#game-select-form > input[name="game-selected"]').change(function() {
-    var selectedVal = $(this).val();
-    if (DEBUG) { console.log('Game with value ' + selectedVal + ' selected'); }
-    if (selectedVal === "new-game") {
-      // insert new game function here
+
+  var quit = false; // indicates when to exit the application
+  while (!quit) {
+    $('.game-item').remove(); // remove the old list items
+    // refresh the list
+    var gameList = JSON.parse(localStorage.getItem('gamelist'));
+    var gameData = new Array(gameList.length);
+    for (var i = gameData.length-1; i >= 0; i--) {
+      gameData[i] = JSON.parse(localStorage.getItem(gameList[i]));
+      var radio_html = '<input type="radio" name="game-selected" class="game-item" value="' + String(i) + '"> ' + gameData[i].name + '<br>' + (gameData[i].myTurn ? "Your turn" : "Opponent's turn") + '<br><i>Started: ' + gameData[i].date + '</i><br>';
+      $('#game-select-form').prepend(radio_html);
     }
-    else {
-      var gameIndex = parseInt(selectedVal);
-      var gameBoard = gameList[gameIndex].board;
+    // set listeners to show board previews
+    $('#game-select-form > input[name="game-selected"]').change(function() {
+      var selectedVal = $(this).val();
+      if (DEBUG) { console.log('Game with value ' + selectedVal + ' selected'); }
+      var gameBoard; // used to show the preview
+      if (selectedVal === "new-game") {
+        gameBoard = new Array(25);
+        for (var i = 0; i < 25; i++) {
+          gameBoard[i] = ['', 0]; // set to blank board
+        }
+      }
+      else {
+        var gameIndex = parseInt(selectedVal);
+        gameBoard = gameData[gameIndex].board;
+      }
       var colors = ['red', 'pink', 'white', 'lightblue', 'blue'];
       for (var r = 0; r < 5; r++) {
       var jqRow = $('#board-preview tr:nth-child(' + String(r+1) + ')');
@@ -103,9 +114,14 @@ function main(data) {
           jqCell.css('background-color', colors[gameBoard[5*r+c][1]+2]);
         }
       }
-    }
-  });
-  // set first choice to chosen initially
-  $('#game-select-form > input[type="radio"]:first-child').prop('checked', true).change();
-  $('#games').css('display', 'block'); // show games page
+    });
+    // set first choice to chosen initially
+    $('#game-select-form > input[type="radio"]:first-child').prop('checked', true).change();
+    $('#games').css('display', 'block'); // show games page
+    quit = true;
+  }
+}
+
+function openGame(gameData) {
+  
 }
