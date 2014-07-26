@@ -85,6 +85,7 @@ function main(data) {
     var gameList = JSON.parse(localStorage.getItem('gamelist'));
     var gameData = new Array(gameList.length);
     for (var i = gameData.length-1; i >= 0; i--) {
+      // get each game's data by name from web storage
       gameData[i] = JSON.parse(localStorage.getItem(gameList[i]));
       var radio_html = '<input type="radio" name="game-selected" class="game-item" value="' + String(i) + '"> ' + gameData[i].name + '<br>' + (gameData[i].myTurn ? "Your turn" : "Opponent's turn") + '<br><i>Started: ' + gameData[i].date + '</i><br>';
       $('#game-select-form').prepend(radio_html);
@@ -99,6 +100,8 @@ function main(data) {
         for (var i = 0; i < 25; i++) {
           gameBoard[i] = ['', 0]; // set to blank board
         }
+        // put focus on name text field
+        $('#new-name').focus();
       }
       else {
         var gameIndex = parseInt(selectedVal);
@@ -117,11 +120,42 @@ function main(data) {
     });
     // set first choice to chosen initially
     $('#game-select-form > input[type="radio"]:first-child').prop('checked', true).change();
+    // set listener for form submission
+    $('#game-select-form').submit(function(e) {
+      e.preventDefault();
+      var selectedVal = $(this).find('input[name="game-selected"]:checked').val();
+      if (selectedVal === "new-game") {
+        var newName = $('#new-name').val();
+        if (gameList.indexOf(newName) != -1) { // name already saved
+          if (DEBUG) { console.log('Name already used.'); }
+          // display error message and clear field
+          $('#new-name-error').html('A game is already saved under this name. Please choose a different name.').css('display', 'inline');
+          $('#new-name').val('');
+        }
+        else if (newName.length == 0) {
+          if (DEBUG) { console.log('Name is empty.'); }
+          // display error message
+          $('#new-name-error').html('You must enter a name to save this game under.').css('display', 'inline');
+        }
+        else {
+          quit = newGame(newName);
+        }
+      }
+      else { // chose existing game
+        quit = openGame(gameData[parseInt(selectedVal)]);
+      }
+    });
     $('#games').css('display', 'block'); // show games page
     quit = true;
   }
 }
 
+function newGame(name) {
+  console.log('open new game ' + name);
+  return true;
+}
+
 function openGame(gameData) {
-  
+  console.log('open game ' + gameData.name);
+  return true; 
 }

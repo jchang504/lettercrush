@@ -50,3 +50,8 @@
   text-align: left;
   overflow: auto;
 }
+
+#new-name-error {
+  display: none;
+  color: red;
+}
