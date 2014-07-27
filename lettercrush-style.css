@@ -44,6 +44,10 @@
   border: 1px solid black;
 }
 
+.selected-tile {
+  border: 2px solid black;
+}
+
 #game-select-form {
   float: right;
   text-align: left;
@@ -59,6 +63,21 @@
   display: none;
 }
 
+#back-to-games {
+  display: block;
+}
+
 .left-side {
   float: left;
+}
+
+.right-side {
+  display: none;
+  float: right;
+  text-align: left;
+}
+
+#thinking {
+  text-align: center;
+  cursor: progress;
 }

@@ -20,7 +20,6 @@ function Game(aName, aDate, aMyTurn, aBoard, aBlockedWords, aTst) {
   var board = aBoard;
   var blockedWords = aBlockedWords;
   var tst = aTst;
-  var currScore;
   var currMovesList;
   var bestMoves = null;
   var bestMoveValues = null;
@@ -41,6 +40,9 @@ function Game(aName, aDate, aMyTurn, aBoard, aBlockedWords, aTst) {
   console.log('currMovesList generation took: ' + String(end - start));
 
   // Getters
+  this.getName = function() {
+    return name;
+  }
   this.isMyTurn = function() {
     return myTurn;
   }
@@ -50,24 +52,9 @@ function Game(aName, aDate, aMyTurn, aBoard, aBlockedWords, aTst) {
   this.getBestMoves = function() {
     return bestMoves;
   }
-  this.getCurrScore = function() {
-    return currScore;
+  this.getScoreString = function() {
+    return String(currScore[0]) + ' — ' + String(currScore[1]);
   }
-
-  // updates the current score
-  function calcCurrScore() {
-    currScore = [0, 0];
-    for (var i = 0; i < 25; i++) {
-      var color = board[i][1];
-      if (color > 0) {
-        currScore[0]++; // tally blue tiles
-      }
-      else if (color < 0) {
-        currScore[1]++; // tally red tiles
-      }
-    }
-  }
-  calcCurrScore(); // set initial score
 
   // privileged methods
 
@@ -85,7 +72,6 @@ function Game(aName, aDate, aMyTurn, aBoard, aBlockedWords, aTst) {
     board = state.board; // update board
     myTurn = !myTurn; // change turns
     removeCurrMoves(state.playedWords[0]); // remove word from move list
-    currScore = calcCurrScore(); // update the score
   }
 
   /* Find and set the bestMoves
