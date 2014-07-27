@@ -38,7 +38,7 @@
     <div id="games" class="page">
       <h1>Select a game:</h1>
       <div class="left-side">
-        <table id="board-preview" class="letter-board">
+        <table id="preview-board" class="letter-board">
           <tbody><!-- Letterpress board - fill with JS-->
             <tr><td></td><td></td><td></td><td></td><td></td></tr>
             <tr><td></td><td></td><td></td><td></td><td></td></tr>
@@ -60,7 +60,7 @@
       </form>
     </div><!-- end #games page-->
     <div id="play" class="page">
-      <button id="back-to-games">Back to games list</button>
+      <button id="back-to-games" class="return-button">Back to games list</button>
       <h1 id="turn-indicator"><!--says whose turn it is--></h1>
       <div class="left-side">
         <table id="game-board" class="letter-board">
@@ -109,5 +109,27 @@
         </form>
       </div>
     </div><!-- end #play page-->
+    <div id="#new-game">
+      <button id="cancel-new" class="return-button">Cancel</button>
+      <form id="new-form" action="lettercrush.html">
+        <table id="new-board" class="left-side">
+          <tbody><!-- editable Letterpress board -->
+            <tr><input type="text" maxlength="1"><input type="text" maxlength="1"><input type="text" maxlength="1"><input type="text" maxlength="1"><input type="text" maxlength="1"></tr>
+            <tr><input type="text" maxlength="1"><input type="text" maxlength="1"><input type="text" maxlength="1"><input type="text" maxlength="1"><input type="text" maxlength="1"></tr>
+            <tr><input type="text" maxlength="1"><input type="text" maxlength="1"><input type="text" maxlength="1"><input type="text" maxlength="1"><input type="text" maxlength="1"></tr>
+            <tr><input type="text" maxlength="1"><input type="text" maxlength="1"><input type="text" maxlength="1"><input type="text" maxlength="1"><input type="text" maxlength="1"></tr>
+            <tr><input type="text" maxlength="1"><input type="text" maxlength="1"><input type="text" maxlength="1"><input type="text" maxlength="1"><input type="text" maxlength="1"></tr>
+          </tbody>
+        </table>
+        <div class="right-side">
+          <input type="radio" name="whose-turn" value="mine" checked> My turn
+          <br>
+          <input type="radio" name="whose-turn" value="opp"> Opponent's turn
+          <textarea name="played-words" rows="5" cols="20" placeholder="List the words that have already been played here, each on a separate line."></textarea>
+          <button type="submit">Start</button>
+        </div>
+      </form>
+      <span id="new-incomplete">Please fill in the entire board.</span>
+    </div><!-- end #new-game page-->
   <body>
 </html>

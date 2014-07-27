@@ -63,7 +63,7 @@
   display: none;
 }
 
-#back-to-games {
+.return-button {
   display: block;
 }
 
@@ -80,4 +80,9 @@
 #thinking {
   text-align: center;
   cursor: progress;
+}
+
+#new-incomplete {
+  display: none;
+  color: red;
 }

@@ -118,10 +118,18 @@ function main(data) {
     updateGameList();
     $('#play').hide();
     $('#games').show();
+    // unblock words from opened game
+    tst.unblock();
+  });
+
+  // set listener for cancel new game button
+  $('#cancel-new').click(function() {
+    $('#new-game').hide();
+    $('#games').show();
+  });
+
   });
   
-
-
   $('#games').show(); // show games page
 }
 
@@ -129,10 +137,55 @@ function main(data) {
 function newGame(name) {
   console.log('Set up new game ' + name);
   $('#games').hide(); // hide games page
+  
+  // set listeners to change tile colors
+  $('#new-board input').off('dblclick');
+  var colors = ['red', 'pink', 'white', 'lightblue', 'blue'];
+  $('#new-board input').dblclick(function() {
+    // cycle through colors
+    var currColor = $(this).css('background-color');
+    var nextColor = colors[(colors.indexOf(currColor)+1) % 5];
+    $(this).css('background-color', nextColor);
+  });
+
+  // submit listener
+  $('#new-form').off('submit');
+  $('#new-form').submit(function(e) {
+    e.preventDefault();
+    var newBoard = new Array(25);
+    var jqTiles = $('#new-board input');
+    // fetch the board input
+    for (var i = 0; i < 25; i++) {
+      var jqTile = $(jqTiles[i]);
+      var letter = jqTile.val().toLowerCase();
+      // check that input is filled
+      if (letter.length != 1) {
+        $('#new-incomplete').show();
+        return;
+      }
+      var color = colors.indexOf(jqTile.css('background-color')) - 2;
+      newBoard[i] = [letter, color];
+    }
+    var turn = "mine" == $('input[name="whose-turn"]:checked').val();
+    var played = $('textarea[name="played-words"]').val().split('\n');
+    // finally, create the game
+    var game = new Game(name, new Date().toDateString(), turn, newBoard, played, tst);
+    // save game
+    localStorage.setItem(name, game.saveString());
+    // add to game list
+    var oldList = JSON.parse(localStorage.getItem('gamelist'));
+    localStorage.setItem('gamelist', JSON.stringify(oldList.push(name)));
+    console.log('Created new game ' + name);
+    // finally, open new game
+    $('#new-game').hide();
+    openGame(JSON.parse(localStorage.getItem(name)));
+  });
+
+  $('#new-game').show();
 }
 
 /* opens an existing game for interaction
- * REQUIRES: game is an element of gameData
+ * REQUIRES: game is a result of Game.saveString()
  */
 function openGame(game) {
   console.log('Open game ' + game.name);
@@ -170,7 +223,7 @@ function openGame(game) {
 
 // set listeners for #gen-moves panel
 function setGenMoves(game) {
-  $('#gen-form').off("submit");
+  $('#gen-form').off('submit');
   $('#gen-form').submit(function(e) {
     e.preventDefault();
     var timeLimit = $('#gen-form > input[name="time-limit"]').val();
@@ -211,7 +264,7 @@ function updateChooseMove(game) {
     $('#choose-form').prepend(radio_html);
   }
   // remove previous listeners
-  $('#choose-form input[name="move-selected"]').off("change");
+  $('#choose-form input[name="move-selected"]').off('change');
   // set listeners for move selection with board preview
   $('#choose-form input[name="move-selected"]').change(function() {
     var selectedVal = $(this).val();
@@ -366,7 +419,7 @@ function updateGameList() {
     $('#game-select-form').prepend(radio_html);
   }
   // remove previous listeners
-  $('#game-select-form input[name="game-selected"]').off("change");
+  $('#game-select-form input[name="game-selected"]').off('change');
   // set listeners to show board previews
   $('#game-select-form input[name="game-selected"]').change(function() {
     var selectedVal = $(this).val();
@@ -388,8 +441,8 @@ function updateGameList() {
       var score = tallyScore(gameData[gameIndex].board);
       $('#games h2.score').html(score);
     }
-    // fill #board-preview with the board
-    fillBoard($('#board-preview'), gameBoard);
+    // fill #preview-board with the board
+    fillBoard($('#preview-board'), gameBoard);
   });
   // set first choice to chosen initially
   $('#game-select-form div:first-child input[type="radio"]').prop('checked', true).change();
