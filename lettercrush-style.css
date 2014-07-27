@@ -44,8 +44,8 @@
   border: 1px solid black;
 }
 
-.selected-tile {
-  border: 2px solid black;
+.letter-board td.selected-tile {
+  border: 3px solid black;
 }
 
 #game-select-form {
@@ -63,6 +63,10 @@
   display: none;
 }
 
+.play-panel {
+  display: none;
+}
+
 .return-button {
   display: block;
 }
@@ -72,7 +76,6 @@
 }
 
 .right-side {
-  display: none;
   float: right;
   text-align: left;
 }
@@ -80,6 +83,40 @@
 #thinking {
   text-align: center;
   cursor: progress;
+}
+
+#new-game {
+  display: none;
+}
+
+.red {
+  background-color: red;
+}
+
+.pink {
+  background-color: pink;
+}
+
+.white {
+  background-color: white;
+}
+
+.lightblue {
+  background-color: lightblue;
+}
+
+.blue {
+  background-color: blue;
+}
+
+#new-board td > input {
+  border: none;
+  background-color: inherit;
+}
+
+textarea[name="played-words"] {
+  overflow: auto;
+  resize: vertical;
 }
 
 #new-incomplete {

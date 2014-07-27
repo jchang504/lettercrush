@@ -68,19 +68,19 @@ function main(data) {
   console.log('Dictionary built.');
   $('#loading').hide(); // hide loading page
 
-  //if (DEBUG) {
-  //  var testBoard = new Array(25);
-  //  for (var i = 0; i < 25; i++) {
-  //    testBoard[i] = [String.fromCharCode(97+i), (i%5)-2];
-  //  }
+  if (DEBUG) {
+    var testBoard = new Array(25);
+    for (var i = 0; i < 25; i++) {
+      testBoard[i] = [String.fromCharCode(97+i), (i%5)-2];
+    }
 
-  //  var johnGame = new Game('John', new Date().toDateString(), true, testBoard, [], tst);
-  //  var rohitGame = new Game('Rohit', new Date().toDateString(), true, testBoard, [], tst);
-  //  localStorage.setItem('John', johnGame.saveString());
-  //  localStorage.setItem('Rohit', rohitGame.saveString());
-  //  var testList = ['John', 'Rohit'];
-  //  localStorage.setItem('gamelist', JSON.stringify(testList));
-  //}
+    var johnGame = new Game('John', new Date().toDateString(), true, testBoard, [], tst);
+    var rohitGame = new Game('Rohit', new Date().toDateString(), true, testBoard, [], tst);
+    localStorage.setItem('John', johnGame.saveString());
+    localStorage.setItem('Rohit', rohitGame.saveString());
+    var testList = ['John', 'Rohit'];
+    localStorage.setItem('gamelist', JSON.stringify(testList));
+  }
 
   updateGameList();
 
@@ -109,6 +109,7 @@ function main(data) {
     else { // chose existing game
       openGame(gameData[parseInt(selectedVal)]);
     }
+    $('#new-name').val(''); // reset text field
   });
 
   // #play page
@@ -116,11 +117,17 @@ function main(data) {
   // set listener for back to games button
   $('#back-to-games').click(function() {
     updateGameList();
+    $('#game-board tr > td').removeClass('selected-tile');
+    $('#gen-moves').hide();
+    $('#choose-move').hide();
+    $('#construct-move').hide();
     $('#play').hide();
     $('#games').show();
     // unblock words from opened game
     tst.unblock();
   });
+
+  // #new-game page
 
   // set listener for cancel new game button
   $('#cancel-new').click(function() {
@@ -128,8 +135,11 @@ function main(data) {
     $('#games').show();
   });
 
+  // prevent text field clicks from changing color
+  $('#new-board td > input').click(function(e) {
+    e.stopPropagation();
   });
-  
+
   $('#games').show(); // show games page
 }
 
@@ -139,13 +149,13 @@ function newGame(name) {
   $('#games').hide(); // hide games page
   
   // set listeners to change tile colors
-  $('#new-board input').off('dblclick');
+  $('#new-board td').off('click');
   var colors = ['red', 'pink', 'white', 'lightblue', 'blue'];
-  $('#new-board input').dblclick(function() {
+  $('#new-board td').click(function() {
     // cycle through colors
-    var currColor = $(this).css('background-color');
+    var currColor = $(this).attr('class');
     var nextColor = colors[(colors.indexOf(currColor)+1) % 5];
-    $(this).css('background-color', nextColor);
+    $(this).removeClass(currColor).addClass(nextColor);
   });
 
   // submit listener
@@ -167,14 +177,15 @@ function newGame(name) {
       newBoard[i] = [letter, color];
     }
     var turn = "mine" == $('input[name="whose-turn"]:checked').val();
-    var played = $('textarea[name="played-words"]').val().split('\n');
-    // finally, create the game
-    var game = new Game(name, new Date().toDateString(), turn, newBoard, played, tst);
+    var played = $('textarea[name="played-words"]').val().toLowerCase().split('\n');
+    // finally, manually create the game string
+    var gameString = JSON.stringify({name: name, date: new Date().toDateString(), myTurn: turn, board: newBoard, blocked: played});
     // save game
-    localStorage.setItem(name, game.saveString());
+    localStorage.setItem(name, gameString);
     // add to game list
-    var oldList = JSON.parse(localStorage.getItem('gamelist'));
-    localStorage.setItem('gamelist', JSON.stringify(oldList.push(name)));
+    var gameList = JSON.parse(localStorage.getItem('gamelist'));
+    gameList.push(name);
+    localStorage.setItem('gamelist', JSON.stringify(gameList));
     console.log('Created new game ' + name);
     // finally, open new game
     $('#new-game').hide();
@@ -254,13 +265,14 @@ function setGenMoves(game) {
 // reset listeners for #choose-move panel
 function updateChooseMove(game) {
   var moves = game.getBestMoves();
+  var startState = new GameState(game.isMyTurn(), game.getBoard(), []);
   $('#choose-form .fixed-move').remove(); // remove old options
   for (var i = moves.length-1; i >= 0; i--) { // add the radio options
     var move = moves[i];
-    var state = new GameState(game.isMyTurn(), game.getBoard(), []);
-    state.playMove(move);
-    var word = state.convertToWord(move);
-    var radio_html = '<div class="fixed-move"><input type="radio" name="move-selected" value="' + String(i) + '"> ' + word + '<br>' + tallyScore(state.board) + '</div>';
+    var tempState = startState.clone();
+    tempState.playMove(move);
+    var word = tempState.convertToWord(move);
+    var radio_html = '<div class="fixed-move"><input type="radio" name="move-selected" value="' + String(i) + '"> ' + word + '<br>' + tallyScore(tempState.board) + '</div>';
     $('#choose-form').prepend(radio_html);
   }
   // remove previous listeners
@@ -277,13 +289,17 @@ function updateChooseMove(game) {
     else {
       var moveIndex = parseInt(selectedVal);
       var move = moves[moveIndex];
-      var state = new GameState(game.isMyTurn(), game.getBoard(), []);
-      state.playMove(move);
-      fillBoard($('#game-board'), state.board); // show a preview on the board
+      var tempState = startState.clone();
+      tempState.playMove(move);
+      fillBoard($('#game-board'), tempState.board); // show a preview on the board
+      // unhighlight all tiles
+      $('#game-board tr > td').removeClass('selected-tile');
       // highlight the used tiles
-      for (var i = 0; i < move.length; i++) {
-        var row = Math.floor(i / 5) + 1;
-        var col = Math.floor(i % 5) + 1;
+      var moveEnd = move.indexOf(-1);
+      for (var i = 0; i < moveEnd; i++) {
+        var row = Math.floor(move[i] / 5) + 1;
+        var col = Math.floor(move[i] % 5) + 1;
+        console.log('adding selected-tile to tile at: (' + String(row) + ', ' + String(col) + ')');
         $('#game-board tr:nth-child(' + String(row)+ ') > td:nth-child(' + String(col) + ')').addClass('selected-tile');
       }
     }
@@ -379,8 +395,8 @@ function setConstructMove(game) {
     e.preventDefault();
     var proceed = true;
     // just for word conversion
-    var state = new GameState(true, game.getBoard(), []);
-    if (!tst.lookup(state.convertToWord(move))) { // if not a valid word
+    var tempState = new GameState(true, game.getBoard(), []);
+    if (!tst.lookup(tempState.convertToWord(move))) { // if not a valid word
       proceed = confirm('The proposed move forms a word that is not in the Letterpress dictionary. Proceed anyway?');
     }
     if (proceed) {
@@ -408,13 +424,16 @@ function setConstructMove(game) {
 
 // updates the game list and gameData array for the game selection page
 function updateGameList() {
+  console.log('updating game list');
   $('#game-select-form .game-item').remove(); // remove the old options
   // refresh the list
   gameList = JSON.parse(localStorage.getItem('gamelist'));
+  console.log('gameList: ' + String(gameList));
   gameData = new Array(gameList.length);
   for (var i = gameData.length-1; i >= 0; i--) {
     // get each game's data by name from web storage
     gameData[i] = JSON.parse(localStorage.getItem(gameList[i]));
+    console.log('gameData[' + String(i) + ']: ' + String(gameData[i]));
     var radio_html = '<div class="game-item"><input type="radio" name="game-selected" value="' + String(i) + '"> ' + gameData[i].name + '<br>' + (gameData[i].myTurn ? "Your turn" : "Opponent's turn") + '<br><i>Started: ' + gameData[i].date + '</i></div>';
     $('#game-select-form').prepend(radio_html);
   }

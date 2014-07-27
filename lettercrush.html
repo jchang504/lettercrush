@@ -74,7 +74,7 @@
         </table>
         <h2 class="score"><!-- current score goes here --></h2>
       </div>
-      <div id="gen-moves" class="right-side">
+      <div id="gen-moves" class="right-side play-panel">
         <h3>Generate best moves:</h3>
         <form id="gen-form" action="letterpress.html">
           <label>Max time:</label>
@@ -89,17 +89,17 @@
           <button type="submit">Go</button>
         </form>
       </div>
-      <div id="thinking" class="right-side">
+      <div id="thinking" class="right-side play-panel">
         <h3>Thinking...</h3>
       </div>
-      <div id="choose-move" class="right-side">
+      <div id="choose-move" class="right-side play-panel">
         <form id="choose-form" action="lettercrush.html">
           <input type="radio" name="move-selected" value="construct"> Custom move
           <br>
           <button type="submit">Play</button>
         </form>
       </div>
-      <div id="construct-move" class="right-side">
+      <div id="construct-move" class="right-side play-panel">
         <span id="word-construct"><!--word being constructed goes here--></span>
         <form id="construct-form" action="lettercrush.html">
           <button id="construct-backspace">BS</button>
@@ -109,23 +109,26 @@
         </form>
       </div>
     </div><!-- end #play page-->
-    <div id="#new-game">
+    <div id="new-game" class="page">
       <button id="cancel-new" class="return-button">Cancel</button>
+      <h1>Create a new Game:</h1>
       <form id="new-form" action="lettercrush.html">
-        <table id="new-board" class="left-side">
+        <table id="new-board" class="letter-board left-side">
           <tbody><!-- editable Letterpress board -->
-            <tr><input type="text" maxlength="1"><input type="text" maxlength="1"><input type="text" maxlength="1"><input type="text" maxlength="1"><input type="text" maxlength="1"></tr>
-            <tr><input type="text" maxlength="1"><input type="text" maxlength="1"><input type="text" maxlength="1"><input type="text" maxlength="1"><input type="text" maxlength="1"></tr>
-            <tr><input type="text" maxlength="1"><input type="text" maxlength="1"><input type="text" maxlength="1"><input type="text" maxlength="1"><input type="text" maxlength="1"></tr>
-            <tr><input type="text" maxlength="1"><input type="text" maxlength="1"><input type="text" maxlength="1"><input type="text" maxlength="1"><input type="text" maxlength="1"></tr>
-            <tr><input type="text" maxlength="1"><input type="text" maxlength="1"><input type="text" maxlength="1"><input type="text" maxlength="1"><input type="text" maxlength="1"></tr>
+            <tr><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td></tr>
+            <tr><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td></tr>
+            <tr><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td></tr>
+            <tr><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td></tr>
+            <tr><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td></tr>
           </tbody>
         </table>
         <div class="right-side">
           <input type="radio" name="whose-turn" value="mine" checked> My turn
           <br>
           <input type="radio" name="whose-turn" value="opp"> Opponent's turn
+          <br>
           <textarea name="played-words" rows="5" cols="20" placeholder="List the words that have already been played here, each on a separate line."></textarea>
+          <br>
           <button type="submit">Start</button>
         </div>
       </form>

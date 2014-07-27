@@ -52,15 +52,11 @@ function Game(aName, aDate, aMyTurn, aBoard, aBlockedWords, aTst) {
   this.getBestMoves = function() {
     return bestMoves;
   }
-  this.getScoreString = function() {
-    return String(currScore[0]) + ' — ' + String(currScore[1]);
-  }
-
   // privileged methods
 
   // produces a string of this Game's essential data to be saved
   this.saveString = function() {
-    return JSON.stringify({name: name, date: date, myTurn: myTurn, board: board, blocked: blockedWords, currScore: currScore});
+    return JSON.stringify({name: name, date: date, myTurn: myTurn, board: board, blocked: blockedWords});
   }
 
 
