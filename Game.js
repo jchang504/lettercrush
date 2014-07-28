@@ -52,6 +52,10 @@ function Game(aName, aDate, aMyTurn, aBoard, aBlockedWords, aTst) {
   this.getBestMoves = function() {
     return bestMoves;
   }
+  // word-checker
+  this.hasBeenPlayed = function(word) {
+    return blockedWords.indexOf(word) != -1;
+  }
   // privileged methods
 
   // produces a string of this Game's essential data to be saved
@@ -67,6 +71,7 @@ function Game(aName, aDate, aMyTurn, aBoard, aBlockedWords, aTst) {
     board = state.board; // update board
     myTurn = !myTurn; // change turns
     removeCurrMoves(state.playedWords[0]); // remove word from move list
+    blockedWords.push(state.playedWords[0]); // add to blocked list
   }
 
   /* Find and set the bestMoves

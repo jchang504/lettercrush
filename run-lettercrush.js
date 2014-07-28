@@ -226,7 +226,7 @@ function openGame(game) {
     }
     else {
       $('#turn-indicator').html('Select opponent\'s move:');
-      $('construct-move').show();
+      $('#construct-move').show();
     }
     // finally, bring up the play game page
     $('#loading').hide();
@@ -301,8 +301,8 @@ function updateChooseMove(game) {
       var moveEnd = move.indexOf(-1);
       for (var i = 0; i < moveEnd; i++) {
         var row = Math.floor(move[i] / 5) + 1;
-        var col = Math.floor(move[i] % 5) + 1;
-        $('#game-board tr:nth-child(' + String(row)+ ') > td:nth-child(' + String(col) + ')').addClass('selected-tile');
+        var col = move[i] % 5 + 1;
+        $('#game-board tr:nth-child(' + String(row) + ') > td:nth-child(' + String(col) + ')').addClass('selected-tile');
       }
     }
   });
@@ -354,7 +354,7 @@ function setConstructMove(game) {
       move[nextIndex] = boardIndex;
       nextIndex++;
       // append letter to word construct
-      jqWc.html(jqWc.html() + game.getBoard()[boardIndex][0]);
+      jqWc.html(jqWc.html() + game.getBoard()[boardIndex][0].toUpperCase());
       // mark tile
       $(this).addClass('selected-tile');
     }
@@ -366,13 +366,12 @@ function setConstructMove(game) {
     if (nextIndex > 0) { // at least one tile selected
       var tilePos = move[nextIndex-1];
       // remove last position in move
-      move[nextIndex-1] = -1;
-      nextIndex--;
+      move[--nextIndex] = -1;
       // remove letter from word construct
       var currWord = jqWc.html();
       jqWc.html(currWord.substring(0, currWord.length-1));
       // unmark tile
-      var row = tilePos / 5 + 1;
+      var row = Math.floor(tilePos / 5) + 1;
       var col = tilePos % 5 + 1;
       $('#game-board tr:nth-child(' + String(row) + ') > td:nth-child(' + String(col) + ')').removeClass('selected-tile');
     }
@@ -385,6 +384,7 @@ function setConstructMove(game) {
     for (var j = 0; j < nextIndex; j++) {
       move[j] = -1;
     }
+    nextIndex = 0;
     // reset word construct
     jqWc.html('');
     // unmark all tiles
@@ -398,8 +398,14 @@ function setConstructMove(game) {
     var proceed = true;
     // just for word conversion
     var tempState = new GameState(true, game.getBoard(), []);
-    if (!tst.lookup(tempState.convertToWord(move))) { // if not a valid word
-      proceed = confirm('The proposed move forms a word that is not in the Letterpress dictionary. Proceed anyway?');
+    var word = tempState.convertToWord(move);
+    // if no move entered
+    if (word.length == 0) {
+      proceed = confirm('No move entered. Pass opponent\'s turn?');
+    }
+    // if invalid or already played
+    else if (!tst.lookup(word) || game.hasBeenPlayed(word)) {
+      proceed = confirm('The proposed move forms a word that has already been played or is not in the Letterpress dictionary. Proceed anyway?');
     }
     if (proceed) {
       game.play(move);
