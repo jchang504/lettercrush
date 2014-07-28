@@ -113,15 +113,18 @@
       <button id="cancel-new" class="return-button">Cancel</button>
       <h1>Create a new Game:</h1>
       <form id="new-form" action="lettercrush.html">
-        <table id="new-board" class="letter-board left-side">
-          <tbody><!-- editable Letterpress board -->
-            <tr><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td></tr>
-            <tr><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td></tr>
-            <tr><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td></tr>
-            <tr><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td></tr>
-            <tr><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td></tr>
-          </tbody>
-        </table>
+        <div id="left-side">
+          <table id="new-board" class="letter-board">
+            <tbody><!-- editable Letterpress board -->
+              <tr><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td></tr>
+              <tr><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td></tr>
+              <tr><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td></tr>
+              <tr><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td></tr>
+              <tr><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td></tr>
+            </tbody>
+          </table>
+          <h4>Click outside the letter to change the tile's color. Just select blue or red: we'll automatically figure out which ones are locked for you.</h4>
+        </div>
         <div class="right-side">
           <input type="radio" name="whose-turn" value="mine" checked> My turn
           <br>

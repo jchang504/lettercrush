@@ -68,19 +68,19 @@ function main(data) {
   console.log('Dictionary built.');
   $('#loading').hide(); // hide loading page
 
-  if (DEBUG) {
-    var testBoard = new Array(25);
-    for (var i = 0; i < 25; i++) {
-      testBoard[i] = [String.fromCharCode(97+i), (i%5)-2];
-    }
+  //if (DEBUG) {
+  //  var testBoard = new Array(25);
+  //  for (var i = 0; i < 25; i++) {
+  //    testBoard[i] = [String.fromCharCode(97+i), (i%5)-2];
+  //  }
 
-    var johnGame = new Game('John', new Date().toDateString(), true, testBoard, [], tst);
-    var rohitGame = new Game('Rohit', new Date().toDateString(), true, testBoard, [], tst);
-    localStorage.setItem('John', johnGame.saveString());
-    localStorage.setItem('Rohit', rohitGame.saveString());
-    var testList = ['John', 'Rohit'];
-    localStorage.setItem('gamelist', JSON.stringify(testList));
-  }
+  //  var johnGame = new Game('John', new Date().toDateString(), true, testBoard, [], tst);
+  //  var rohitGame = new Game('Rohit', new Date().toDateString(), true, testBoard, [], tst);
+  //  localStorage.setItem('John', johnGame.saveString());
+  //  localStorage.setItem('Rohit', rohitGame.saveString());
+  //  var testList = ['John', 'Rohit'];
+  //  localStorage.setItem('gamelist', JSON.stringify(testList));
+  //}
 
   updateGameList();
 
@@ -95,7 +95,6 @@ function main(data) {
         if (DEBUG) { console.log('Name already used.'); }
         // display error message and clear field
         $('#new-name-error').html('A game is already saved under this name. Please choose a different name.').show();
-        $('#new-name').val('');
       }
       else if (newName.length == 0) {
         if (DEBUG) { console.log('Name is empty.'); }
@@ -150,11 +149,11 @@ function newGame(name) {
   
   // set listeners to change tile colors
   $('#new-board td').off('click');
-  var colors = ['red', 'pink', 'white', 'lightblue', 'blue'];
+  var colors = ['pink', 'white', 'lightblue'];
   $('#new-board td').click(function() {
     // cycle through colors
     var currColor = $(this).attr('class');
-    var nextColor = colors[(colors.indexOf(currColor)+1) % 5];
+    var nextColor = colors[(colors.indexOf(currColor)+1) % 3];
     $(this).removeClass(currColor).addClass(nextColor);
   });
 
@@ -163,17 +162,17 @@ function newGame(name) {
   $('#new-form').submit(function(e) {
     e.preventDefault();
     var newBoard = new Array(25);
-    var jqTiles = $('#new-board input');
+    var jqTiles = $('#new-board td');
     // fetch the board input
     for (var i = 0; i < 25; i++) {
       var jqTile = $(jqTiles[i]);
-      var letter = jqTile.val().toLowerCase();
+      var letter = jqTile.find('input').val().toLowerCase();
       // check that input is filled
       if (letter.length != 1) {
         $('#new-incomplete').show();
         return;
       }
-      var color = colors.indexOf(jqTile.css('background-color')) - 2;
+      var color = colors.indexOf(jqTile.attr('class'))-1;
       newBoard[i] = [letter, color];
     }
     var turn = "mine" == $('input[name="whose-turn"]:checked').val();
@@ -299,7 +298,6 @@ function updateChooseMove(game) {
       for (var i = 0; i < moveEnd; i++) {
         var row = Math.floor(move[i] / 5) + 1;
         var col = Math.floor(move[i] % 5) + 1;
-        console.log('adding selected-tile to tile at: (' + String(row) + ', ' + String(col) + ')');
         $('#game-board tr:nth-child(' + String(row)+ ') > td:nth-child(' + String(col) + ')').addClass('selected-tile');
       }
     }
@@ -425,6 +423,7 @@ function setConstructMove(game) {
 // updates the game list and gameData array for the game selection page
 function updateGameList() {
   console.log('updating game list');
+  $('#new-name-error').html('');
   $('#game-select-form .game-item').remove(); // remove the old options
   // refresh the list
   gameList = JSON.parse(localStorage.getItem('gamelist'));
@@ -433,7 +432,8 @@ function updateGameList() {
   for (var i = gameData.length-1; i >= 0; i--) {
     // get each game's data by name from web storage
     gameData[i] = JSON.parse(localStorage.getItem(gameList[i]));
-    console.log('gameData[' + String(i) + ']: ' + String(gameData[i]));
+    console.log('gameData[' + String(i) + ']: ');
+    console.log(gameData[i]);
     var radio_html = '<div class="game-item"><input type="radio" name="game-selected" value="' + String(i) + '"> ' + gameData[i].name + '<br>' + (gameData[i].myTurn ? "Your turn" : "Opponent's turn") + '<br><i>Started: ' + gameData[i].date + '</i></div>';
     $('#game-select-form').prepend(radio_html);
   }

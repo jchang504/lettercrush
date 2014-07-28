@@ -17,7 +17,7 @@ function Game(aName, aDate, aMyTurn, aBoard, aBlockedWords, aTst) {
   var name = aName;
   var date = aDate;
   var myTurn = aMyTurn;
-  var board = aBoard;
+  var board = updateLocked(aBoard);
   var blockedWords = aBlockedWords;
   var tst = aTst;
   var currMovesList;
@@ -58,7 +58,6 @@ function Game(aName, aDate, aMyTurn, aBoard, aBlockedWords, aTst) {
   this.saveString = function() {
     return JSON.stringify({name: name, date: date, myTurn: myTurn, board: board, blocked: blockedWords});
   }
-
 
   /* Plays the move on this game, effecting the necessary board changes.
    */
@@ -240,6 +239,15 @@ function Game(aName, aDate, aMyTurn, aBoard, aBlockedWords, aTst) {
       locs[board[i][0].charCodeAt(0) - 97].push(i);
     }
     return locs;
+  }
+
+  /* a helper to update the locked tiles on a new game's board (which is given
+   * only in blue or red)
+   */
+  function updateLocked(plainBoard) {
+    var temp = new GameState(true, plainBoard, []);
+    temp.updateColors();
+    return temp.board;
   }
 
 }
