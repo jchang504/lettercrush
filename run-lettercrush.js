@@ -119,6 +119,7 @@ function main(data) {
     $('#game-board tr > td').removeClass('selected-tile');
     $('#gen-moves').hide();
     $('#choose-move').hide();
+    $('#game-board td').off('click');
     $('#construct-move').hide();
     $('#play').hide();
     $('#games').show();
@@ -214,7 +215,6 @@ function openGame(game) {
     console.log('Game data loaded.');
     // set listeners for each panel
     setGenMoves(game);
-    setConstructMove(game);
     // fill the #game-board
     fillBoard($('#game-board'), game.getBoard());
     // show the score
@@ -226,6 +226,7 @@ function openGame(game) {
     }
     else {
       $('#turn-indicator').html('Select opponent\'s move:');
+      updateConstructMove(game);
       $('#construct-move').show();
     }
     // finally, bring up the play game page
@@ -270,6 +271,7 @@ function updateChooseMove(game) {
   var moves = game.getBestMoves();
   var startState = new GameState(game.isMyTurn(), game.getBoard(), []);
   $('#choose-form .fixed-move').remove(); // remove old options
+  $('#choose-form input[value="construct"]').prop('checked', false);
   for (var i = moves.length-1; i >= 0; i--) { // add the radio options
     var move = moves[i];
     var tempState = startState.clone();
@@ -314,6 +316,7 @@ function updateChooseMove(game) {
     var selectedVal = $(this).find('input[name="move-selected"]:checked').val();
     if (selectedVal === "construct") { // allow user to construct move
       $('#choose-move').hide();
+      updateConstructMove(game);
       $('#construct-move').show();
     }
     else {
@@ -328,6 +331,7 @@ function updateChooseMove(game) {
       // now go to construct opponent move
       $('#choose-move').hide();
       $('#turn-indicator').html('Select opponent\'s move:');
+      updateConstructMove(game);
       $('#construct-move').show();
     }
   });
@@ -335,13 +339,14 @@ function updateChooseMove(game) {
 }
 
 // set listeners for #construct-move panel
-function setConstructMove(game) {
+function updateConstructMove(game) {
   var move = new Array(25);
   for (var i = 0; i < 25; i++) {
     move[i] = -1;
   }
   var nextIndex = 0;
   var jqWc = $('#word-construct');
+  jqWc.html('');
 
   // set tile listeners
   $('#game-board td').off('click');
@@ -420,6 +425,8 @@ function setConstructMove(game) {
       // go to appropriate next panel
       if (game.isMyTurn()) {
         $('#turn-indicator').html('Select your move:');
+        // make tiles unclickable
+        $('#game-board td').off('click');
         $('#construct-move').hide();
         $('#gen-moves').show();
       }
