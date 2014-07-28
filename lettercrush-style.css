@@ -73,10 +73,12 @@
 
 .left-side {
   float: left;
+  width: 50%;
 }
 
 .right-side {
   float: right;
+  width: 50%;
   text-align: left;
 }
 
@@ -89,10 +91,6 @@
   display: none;
 }
 
-.red {
-  background-color: red;
-}
-
 .pink {
   background-color: pink;
 }
@@ -103,10 +101,6 @@
 
 .lightblue {
   background-color: lightblue;
-}
-
-.blue {
-  background-color: blue;
 }
 
 #new-board td > input {

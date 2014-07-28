@@ -113,7 +113,7 @@
       <button type="button" id="cancel-new" class="return-button">Cancel</button>
       <h1>Create a new Game:</h1>
       <form id="new-form" action="lettercrush.html">
-        <div id="left-side">
+        <div class="left-side">
           <table id="new-board" class="letter-board">
             <tbody><!-- editable Letterpress board -->
               <tr><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td></tr>
@@ -123,6 +123,7 @@
               <tr><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td><td class="white"><input type="text" maxlength="1" size="1"></td></tr>
             </tbody>
           </table>
+          <span id="new-incomplete">Please fill in the entire board.</span>
           <h4>Click outside the letter to change the tile's color. Just select blue or red: we'll automatically figure out which ones are locked for you.</h4>
         </div>
         <div class="right-side">
@@ -135,7 +136,6 @@
           <button type="submit">Start</button>
         </div>
       </form>
-      <span id="new-incomplete">Please fill in the entire board.</span>
     </div><!-- end #new-game page-->
   <body>
 </html>

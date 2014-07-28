@@ -116,9 +116,9 @@ function main(data) {
   // set listener for back to games button
   $('#back-to-games').click(function() {
     updateGameList();
-    $('#game-board tr > td').removeClass('selected-tile');
     $('#gen-moves').hide();
     $('#choose-move').hide();
+    $('#game-board tr > td').removeClass('selected-tile');
     $('#game-board td').off('click');
     $('#construct-move').hide();
     $('#play').hide();
@@ -313,7 +313,11 @@ function updateChooseMove(game) {
   $('#choose-form').off('submit');
   $('#choose-form').submit(function(e) {
     e.preventDefault();
-    var selectedVal = $(this).find('input[name="move-selected"]:checked').val();
+    var selected = $(this).find('input[name="move-selected"]:checked');
+    if (selected.length == 0) {
+      return;
+    }
+    var selectedVal = selected.val();
     if (selectedVal === "construct") { // allow user to construct move
       $('#choose-move').hide();
       updateConstructMove(game);
