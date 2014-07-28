@@ -17,7 +17,7 @@ function Game(aName, aDate, aMyTurn, aBoard, aBlockedWords, aTst) {
   var name = aName;
   var date = aDate;
   var myTurn = aMyTurn;
-  var board = updateLocked(aBoard);
+  var board = aBoard;
   var blockedWords = aBlockedWords;
   var tst = aTst;
   var currMovesList;
@@ -239,15 +239,6 @@ function Game(aName, aDate, aMyTurn, aBoard, aBlockedWords, aTst) {
       locs[board[i][0].charCodeAt(0) - 97].push(i);
     }
     return locs;
-  }
-
-  /* a helper to update the locked tiles on a new game's board (which is given
-   * only in blue or red)
-   */
-  function updateLocked(plainBoard) {
-    var temp = new GameState(true, plainBoard, []);
-    temp.updateColors();
-    return temp.board;
   }
 
 }

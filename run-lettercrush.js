@@ -175,6 +175,10 @@ function newGame(name) {
       var color = colors.indexOf(jqTile.attr('class'))-1;
       newBoard[i] = [letter, color];
     }
+    // create a dummy GameState to update the locked tiles
+    var tempState = new GameState(true, newBoard, []);
+    tempState.updateColors();
+    newBoard = tempState.board;
     var turn = "mine" == $('input[name="whose-turn"]:checked').val();
     var played = $('textarea[name="played-words"]').val().toLowerCase().split('\n');
     // finally, manually create the game string
