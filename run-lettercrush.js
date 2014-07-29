@@ -68,19 +68,19 @@ function main(data) {
   console.log('Dictionary built.');
   $('#loading').hide(); // hide loading page
 
-  //if (DEBUG) {
-  //  var testBoard = new Array(25);
-  //  for (var i = 0; i < 25; i++) {
-  //    testBoard[i] = [String.fromCharCode(97+i), (i%5)-2];
-  //  }
+  if (DEBUG) {
+    var testBoard = new Array(25);
+    for (var i = 0; i < 25; i++) {
+      testBoard[i] = [String.fromCharCode(97+i), (i%5)-2];
+    }
 
-  //  var johnGame = new Game('John', new Date().toDateString(), true, testBoard, [], tst);
-  //  var rohitGame = new Game('Rohit', new Date().toDateString(), true, testBoard, [], tst);
-  //  localStorage.setItem('John', johnGame.saveString());
-  //  localStorage.setItem('Rohit', rohitGame.saveString());
-  //  var testList = ['John', 'Rohit'];
-  //  localStorage.setItem('gamelist', JSON.stringify(testList));
-  //}
+    var johnGame = new Game('John', new Date().toDateString(), 0, true, testBoard, [], tst);
+    var rohitGame = new Game('Rohit', new Date().toDateString(), 0, true, testBoard, [], tst);
+    localStorage.setItem('John', johnGame.saveString());
+    localStorage.setItem('Rohit', rohitGame.saveString());
+    var testList = ['John', 'Rohit'];
+    localStorage.setItem('gamelist', JSON.stringify(testList));
+  }
 
   updateGameList();
 
@@ -183,7 +183,7 @@ function newGame(name) {
     var turn = "mine" == $('input[name="whose-turn"]:checked').val();
     var played = $('textarea[name="played-words"]').val().toLowerCase().split('\n');
     // finally, manually create the game string
-    var gameString = JSON.stringify({name: name, date: new Date().toDateString(), myTurn: turn, board: newBoard, blocked: played});
+    var gameString = JSON.stringify({name: name, date: new Date().toDateString(), over: tempState.over, myTurn: turn, board: newBoard, blocked: played});
     // save game
     localStorage.setItem(name, gameString);
     // add to game list
@@ -211,16 +211,24 @@ function openGame(game) {
   /* strangely, this hack was the only thing that worked to get the loading
   page to show up as desired. The rest of the code is in this function.*/
   var loadGame = function() {
-    game = new Game(game.name, game.date, game.myTurn, game.board, game.blocked, tst);
+    game = new Game(game.name, game.date, game.over, game.myTurn, game.board, game.blocked, tst);
     console.log('Game data loaded.');
-    // set listeners for each panel
-    setGenMoves(game);
     // fill the #game-board
     fillBoard($('#game-board'), game.getBoard());
     // show the score
     $('#play h2.score').html(tallyScore(game.getBoard()));
+    var gameOver = game.getOver();
+    if (gameOver != 0) { // game is over
+      if (gameOver > 0) { // you won
+        $('#turn-indicator').html('You won!');
+      }
+      else { // opponent won
+        $('#turn-indicator').html('Opponent won.');
+      }
+    }
     // show appropriate .right-side panel
-    if (game.isMyTurn()) {
+    else if (game.isMyTurn()) {
+      setGenMoves(game);
       $('#turn-indicator').html('Select your move:');
       $('#gen-moves').show();
     }
@@ -334,9 +342,20 @@ function updateChooseMove(game) {
       $('#play h2.score').html(tallyScore(game.getBoard()));
       // now go to construct opponent move
       $('#choose-move').hide();
-      $('#turn-indicator').html('Select opponent\'s move:');
-      updateConstructMove(game);
-      $('#construct-move').show();
+      var gameOver = game.getOver();
+      if (gameOver != 0) {
+        if (gameOver > 0) { // you won
+          $('#turn-indicator').html('You won!');
+        }
+        else { // opponent won
+          $('#turn-indicator').html('Opponent won.');
+        }
+      }
+      else {
+        $('#turn-indicator').html('Select opponent\'s move:');
+        updateConstructMove(game);
+        $('#construct-move').show();
+      }
     }
   });
 
@@ -424,10 +443,19 @@ function updateConstructMove(game) {
       fillBoard($('#game-board'), game.getBoard());
       // update score
       $('#play h2.score').html(tallyScore(game.getBoard()));
-      // reset this panel
-      $('#construct-clear').click();
+      // check if game is over
+      var gameOver = game.getOver();
+      if (gameOver != 0) {
+        $('#construct-move').hide();
+        if (gameOver > 0) { // you won
+          $('#turn-indicator').html('You won!');
+        }
+        else { // opponent won
+          $('#turn-indicator').html('Opponent won.');
+        }
+      }
       // go to appropriate next panel
-      if (game.isMyTurn()) {
+      else if (game.isMyTurn()) {
         $('#turn-indicator').html('Select your move:');
         // make tiles unclickable
         $('#game-board td').off('click');
@@ -435,6 +463,8 @@ function updateConstructMove(game) {
         $('#gen-moves').show();
       }
       else {
+        $('#construct-clear').click();
+        updateConstructMove(game);
         $('#turn-indicator').html('Select opponent\'s move:');
       }
     }
@@ -455,7 +485,7 @@ function updateGameList() {
     gameData[i] = JSON.parse(localStorage.getItem(gameList[i]));
     console.log('gameData[' + String(i) + ']: ');
     console.log(gameData[i]);
-    var radio_html = '<div class="game-item"><input type="radio" name="game-selected" value="' + String(i) + '"> ' + gameData[i].name + '<br>' + (gameData[i].myTurn ? "Your turn" : "Opponent's turn") + '<br><i>Started: ' + gameData[i].date + '</i></div>';
+    var radio_html = '<div class="game-item"><input type="radio" name="game-selected" value="' + String(i) + '"> ' + gameData[i].name + '<br>' + (gameData[i].over != 0 ? 'Finished' : (gameData[i].myTurn ? 'Your turn' : 'Opponent\'s turn')) + '<br><i>Started: ' + gameData[i].date + '</i></div>';
     $('#game-select-form').prepend(radio_html);
   }
   // remove previous listeners

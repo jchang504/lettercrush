@@ -6,16 +6,17 @@ BOARD_MIN = -50;
 
 /* constructor for a Game
  * REQUIRES: aName is a string, aDate is the result of a
- * new Date().toDateString(), aMyTurn is a boolean, aBoard is a valid
- * board 25-array of tiles (each is an array of [letter, color])),
- * aBlockedWords is an array of strings representing valid words that have
- * been played, and aTst is the TST to use for this game
+ * new Date().toDateString(), aOver is analogous to GameState's over, aMyTurn
+ * is a boolean, aBoard is a valid board (25-array of tiles (each is an array
+ * of [letter, color])), aBlockedWords is an array of strings representing
+ * valid words that have been played, and aTst is the TST to use for this game
  * ENSURES: returns a Game representing these facts
  */
-function Game(aName, aDate, aMyTurn, aBoard, aBlockedWords, aTst) {
+function Game(aName, aDate, aOver, aMyTurn, aBoard, aBlockedWords, aTst) {
   // private variables
   var name = aName;
   var date = aDate;
+  var over = aOver;
   var myTurn = aMyTurn;
   var board = aBoard;
   var blockedWords = aBlockedWords;
@@ -43,6 +44,9 @@ function Game(aName, aDate, aMyTurn, aBoard, aBlockedWords, aTst) {
   this.getName = function() {
     return name;
   }
+  this.getOver = function() {
+    return over;
+  }
   this.isMyTurn = function() {
     return myTurn;
   }
@@ -60,7 +64,7 @@ function Game(aName, aDate, aMyTurn, aBoard, aBlockedWords, aTst) {
 
   // produces a string of this Game's essential data to be saved
   this.saveString = function() {
-    return JSON.stringify({name: name, date: date, myTurn: myTurn, board: board, blocked: blockedWords});
+    return JSON.stringify({name: name, date: date, over: over, myTurn: myTurn, board: board, blocked: blockedWords});
   }
 
   /* Plays the move on this game, effecting the necessary board changes.
@@ -70,6 +74,7 @@ function Game(aName, aDate, aMyTurn, aBoard, aBlockedWords, aTst) {
     state.playMove(move);
     board = state.board; // update board
     myTurn = !myTurn; // change turns
+    over = state.over; // update over
     removeCurrMoves(state.playedWords[0]); // remove word from move list
     blockedWords.push(state.playedWords[0]); // add to blocked list
   }
