@@ -68,19 +68,19 @@ function main(data) {
   console.log('Dictionary built.');
   $('#loading').hide(); // hide loading page
 
-  if (DEBUG) {
-    var testBoard = new Array(25);
-    for (var i = 0; i < 25; i++) {
-      testBoard[i] = [String.fromCharCode(97+i), (i%5)-2];
-    }
+  //if (DEBUG) {
+  //  var testBoard = new Array(25);
+  //  for (var i = 0; i < 25; i++) {
+  //    testBoard[i] = [String.fromCharCode(97+i), (i%5)-2];
+  //  }
 
-    var johnGame = new Game('John', new Date().toDateString(), 0, true, testBoard, [], tst);
-    var rohitGame = new Game('Rohit', new Date().toDateString(), 0, true, testBoard, [], tst);
-    localStorage.setItem('John', johnGame.saveString());
-    localStorage.setItem('Rohit', rohitGame.saveString());
-    var testList = ['John', 'Rohit'];
-    localStorage.setItem('gamelist', JSON.stringify(testList));
-  }
+  //  var johnGame = new Game('John', new Date().toDateString(), 0, true, testBoard, [], tst);
+  //  var rohitGame = new Game('Rohit', new Date().toDateString(), 0, true, testBoard, [], tst);
+  //  localStorage.setItem('John', johnGame.saveString());
+  //  localStorage.setItem('Rohit', rohitGame.saveString());
+  //  var testList = ['John', 'Rohit'];
+  //  localStorage.setItem('gamelist', JSON.stringify(testList));
+  //}
 
   updateGameList();
 
@@ -132,6 +132,7 @@ function main(data) {
   // set listener for cancel new game button
   $('#cancel-new').click(function() {
     $('#new-game').hide();
+    $('#new-name-error').hide();
     $('#games').show();
   });
 
@@ -147,6 +148,9 @@ function main(data) {
 function newGame(name) {
   console.log('Set up new game ' + name);
   $('#games').hide(); // hide games page
+  // clear form from past entries
+  $('#new-form')[0].reset();
+  $('#new-board td').attr('class', 'white');
   
   // set listeners to change tile colors
   $('#new-board td').off('click');
