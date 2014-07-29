@@ -478,16 +478,16 @@ function updateGameList() {
   $('#game-select-form .game-item').remove(); // remove the old options
   // refresh the list
   gameList = JSON.parse(localStorage.getItem('gamelist'));
-  console.log('gameList: ' + String(gameList));
   gameData = new Array(gameList.length);
   for (var i = gameData.length-1; i >= 0; i--) {
     // get each game's data by name from web storage
     gameData[i] = JSON.parse(localStorage.getItem(gameList[i]));
     console.log('gameData[' + String(i) + ']: ');
     console.log(gameData[i]);
-    var radio_html = '<div class="game-item"><input type="radio" name="game-selected" value="' + String(i) + '"> ' + gameData[i].name + '<br>' + (gameData[i].over != 0 ? 'Finished' : (gameData[i].myTurn ? 'Your turn' : 'Opponent\'s turn')) + '<br><i>Started: ' + gameData[i].date + '</i></div>';
+    var radio_html = '<div class="game-item"><input type="radio" name="game-selected" value="' + String(i) + '"> ' + gameData[i].name + '<button type="button" class="delete-game" value="' + String(i) + '">Delete</button><br>' + (gameData[i].over != 0 ? 'Finished' : (gameData[i].myTurn ? 'Your turn' : 'Opponent\'s turn')) + '<br><i>Started: ' + gameData[i].date + '</i></div>';
     $('#game-select-form').prepend(radio_html);
   }
+
   // remove previous listeners
   $('#game-select-form input[name="game-selected"]').off('change');
   // set listeners to show board previews
@@ -516,6 +516,15 @@ function updateGameList() {
   });
   // set first choice to chosen initially
   $('#game-select-form div:first-child input[type="radio"]').prop('checked', true).change();
+  
+  // set delete listeners
+  $('#game-select-form button.delete-game').click(function() {
+    var gameIndex = $(this).val();
+    localStorage.removeItem(gameList[gameIndex]); // delete game data
+    gameList.splice(gameIndex, 1); /// remove its name from the list
+    localStorage.setItem('gamelist', JSON.stringify(gameList));
+    updateGameList();
+  });
 }
 
 // helper function to fill the jqBoard with the letters and colors of gameBoard
