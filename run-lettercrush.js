@@ -461,7 +461,8 @@ function updateConstructMove(game) {
       // go to appropriate next panel
       else if (game.isMyTurn()) {
         $('#turn-indicator').html('Select your move:');
-        // make tiles unclickable
+        // reset construction panel and make tiles unclickable
+        $('#construct-clear').click();
         $('#game-board td').off('click');
         $('#construct-move').hide();
         $('#gen-moves').show();
@@ -524,10 +525,14 @@ function updateGameList() {
   // set delete listeners
   $('#game-select-form button.delete-game').click(function() {
     var gameIndex = $(this).val();
-    localStorage.removeItem(gameList[gameIndex]); // delete game data
-    gameList.splice(gameIndex, 1); /// remove its name from the list
-    localStorage.setItem('gamelist', JSON.stringify(gameList));
-    updateGameList();
+    var gameName = gameList[gameIndex];
+    var proceed = confirm('Are you sure you want to delete game ' + gameName + '?');
+    if (proceed) {
+      localStorage.removeItem(gameName); // delete game data
+      gameList.splice(gameIndex, 1); /// remove its name from the list
+      localStorage.setItem('gamelist', JSON.stringify(gameList));
+      updateGameList();
+    }
   });
 }
 
