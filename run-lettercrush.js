@@ -68,20 +68,6 @@ function main(data) {
   console.log('Dictionary built.');
   $('#loading').hide(); // hide loading page
 
-  //if (DEBUG) {
-  //  var testBoard = new Array(25);
-  //  for (var i = 0; i < 25; i++) {
-  //    testBoard[i] = [String.fromCharCode(97+i), (i%5)-2];
-  //  }
-
-  //  var johnGame = new Game('John', new Date().toDateString(), 0, true, testBoard, [], tst);
-  //  var rohitGame = new Game('Rohit', new Date().toDateString(), 0, true, testBoard, [], tst);
-  //  localStorage.setItem('John', johnGame.saveString());
-  //  localStorage.setItem('Rohit', rohitGame.saveString());
-  //  var testList = ['John', 'Rohit'];
-  //  localStorage.setItem('gamelist', JSON.stringify(testList));
-  //}
-
   updateGameList();
 
   // #games page
@@ -146,7 +132,7 @@ function main(data) {
 
 // allows user to set up the new game, then calls openGame
 function newGame(name) {
-  console.log('Set up new game ' + name);
+  if (DEBUG) { console.log('Set up new game ' + name); }
   $('#games').hide(); // hide games page
   // clear form from past entries
   $('#new-form')[0].reset();
@@ -191,10 +177,9 @@ function newGame(name) {
     // save game
     localStorage.setItem(name, gameString);
     // add to game list
-    var gameList = JSON.parse(localStorage.getItem('gamelist'));
     gameList.push(name);
     localStorage.setItem('gamelist', JSON.stringify(gameList));
-    console.log('Created new game ' + name);
+    if (DEBUG) { console.log('Created new game ' + name); }
     // finally, open new game
     $('#new-game').hide();
     openGame(JSON.parse(localStorage.getItem(name)));
@@ -207,7 +192,7 @@ function newGame(name) {
  * REQUIRES: game is a result of Game.saveString()
  */
 function openGame(game) {
-  console.log('Open game ' + game.name);
+  if (DEBUG) { console.log('Open game ' + game.name); }`
   $('#games').hide(); // hide games page
   // show the loading page while game sets up move list
   $('#loading > h1').html('Loading game data...');
@@ -216,7 +201,7 @@ function openGame(game) {
   page to show up as desired. The rest of the code is in this function.*/
   var loadGame = function() {
     game = new Game(game.name, game.date, game.over, game.myTurn, game.board, game.blocked, tst);
-    console.log('Game data loaded.');
+    if (DEBUG) { console.log('Game data loaded.'); }
     // fill the #game-board
     fillBoard($('#game-board'), game.getBoard());
     // show the score
@@ -259,7 +244,7 @@ function setGenMoves(game) {
     // reset the form for next time we look at it
     $('#gen-form')[0].reset();
     $('#gen-moves').hide();
-    console.log('Finding best moves...');
+    if (DEBUG) { console.log('Finding best moves...'); {
     $('#thinking').show();
     // using this setTimeout hack again to show the Thinking panel
     var gen = function() {
@@ -268,7 +253,7 @@ function setGenMoves(game) {
       depthLimit = depthLimit.length == 0 ? 10 : parseInt(depthLimit);
       listLen = listLen.length == 0 ? 5 : parseInt(listLen);
       game.findBestMoves(depthLimit, timeLimit, listLen);
-      console.log('Best moves generated.');
+      if (DEBUG) { console.log('Best moves generated.'); }
       // update move choosing panel
       updateChooseMove(game);
       $('#thinking').hide();
@@ -478,7 +463,7 @@ function updateConstructMove(game) {
 
 // updates the game list and gameData array for the game selection page
 function updateGameList() {
-  console.log('updating game list');
+  if (DEBUG) { console.log('Updating game list'); }
   $('#new-name-error').html('');
   $('#game-select-form .game-item').remove(); // remove the old options
   // refresh the list
@@ -493,8 +478,6 @@ function updateGameList() {
   for (var i = gameData.length-1; i >= 0; i--) {
     // get each game's data by name from web storage
     gameData[i] = JSON.parse(localStorage.getItem(gameList[i]));
-    console.log('gameData[' + String(i) + ']: ');
-    console.log(gameData[i]);
     var radio_html = '<div class="game-item"><input type="radio" name="game-selected" value="' + String(i) + '"> ' + gameData[i].name + '<button type="button" class="delete-game" value="' + String(i) + '">Delete</button><br>' + (gameData[i].over != 0 ? 'Finished' : (gameData[i].myTurn ? 'Your turn' : 'Opponent\'s turn')) + '<br><i>Started: ' + gameData[i].date + '</i></div>';
     $('#game-select-form').prepend(radio_html);
   }
