@@ -482,7 +482,13 @@ function updateGameList() {
   $('#new-name-error').html('');
   $('#game-select-form .game-item').remove(); // remove the old options
   // refresh the list
-  gameList = JSON.parse(localStorage.getItem('gamelist'));
+  var listString = localStorage.getItem('gamelist');
+  if (!listString) {
+    gameList = [];
+  }
+  else {
+    gameList = JSON.parse(listString);
+  }
   gameData = new Array(gameList.length);
   for (var i = gameData.length-1; i >= 0; i--) {
     // get each game's data by name from web storage
