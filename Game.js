@@ -96,7 +96,7 @@ function Game(aName, aDate, aOver, aMyTurn, aBoard, aBlockedWords, aTst) {
       if (depth > 0 && new Date().getTime() > endTime - layerMaxTime) {
         break;
       }
-      var bestMovesLen = Math.max(Math.floor(Math.pow(fullListLen, (1/(depth+2)))), listLen);
+      var bestMovesLen = Math.max(Math.floor(Math.pow(fullListLen, (1 / (depth+2)))), 100); // keep the move list at least 100 long, to avoid shortsightedness
       bestMoves = new Array(bestMovesLen);
       bestMovesValue = new Array(bestMovesLen);
       for (var i = 0; i < bestMovesLen; i++) {
