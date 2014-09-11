@@ -26,7 +26,7 @@
         <h3>Important: this application was designed for and runs best on <a href="http://www.google.com/chrome">Google Chrome</a>. It is <strong>strongly recommended</strong> that you run it on the latest version of Chrome.</h3>
         <h1>Lettercrush</h1>
         <h2>The world's smartest AI for <a href="http://itunes.apple.com/us/app/letterpress-word-game/id526619424" target="_blank">Letterpress</a></h2>
-        <form id="access-form" action="lettercrush.html">
+        <form id="access-form" action="index.html">
           <label>Access code:</label>
           <input type="text" name="access-code" autofocus>
           <button type="submit">Go</button>
@@ -49,7 +49,7 @@
         </table>
         <h2 class="score"><!--score goes here--></h2>
       </div>
-      <form id="game-select-form" action="lettercrush.html">
+      <form id="game-select-form" action="index.html">
         <div><!-- for parallel structure with JS-added elements -->
           <input type="radio" name="game-selected" value="new-game"> New Game<br>
           <label>Name:</label>
@@ -76,7 +76,7 @@
       </div>
       <div id="gen-moves" class="right-side play-panel">
         <h3>Generate best moves:</h3>
-        <form id="gen-form" action="letterpress.html">
+        <form id="gen-form" action="index.html">
           <label>Max time:</label>
           <input type="number" name="time-limit" min="1" max="15" value="5">
           <br>
@@ -93,7 +93,7 @@
         <h3>Thinking...</h3>
       </div>
       <div id="choose-move" class="right-side play-panel">
-        <form id="choose-form" action="lettercrush.html">
+        <form id="choose-form" action="index.html">
           <input type="radio" name="move-selected" value="construct"> Custom move
           <br>
           <button type="submit">Play</button>
@@ -101,7 +101,7 @@
       </div>
       <div id="construct-move" class="right-side play-panel">
         <span id="word-construct"><!--word being constructed goes here--></span>
-        <form id="construct-form" action="lettercrush.html">
+        <form id="construct-form" action="index.html">
           <button type="button" id="construct-backspace">BS</button>
           <button type="button" id="construct-clear">Clear</button>
           <br>
@@ -112,7 +112,7 @@
     <div id="new-game" class="page">
       <button type="button" id="cancel-new" class="return-button">Cancel</button>
       <h1>Create a new Game:</h1>
-      <form id="new-form" action="lettercrush.html">
+      <form id="new-form" action="index.html">
         <div class="left-side">
           <table id="new-board" class="letter-board">
             <tbody><!-- editable Letterpress board -->
