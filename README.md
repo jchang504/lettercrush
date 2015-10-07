@@ -32,16 +32,22 @@ get long...), but its less-tuned precursor, Letterpress Victory, had a 5/5
 going-first and 7/8 going-second winrate against a leading app called
 Letterbrain in random games when I ran some trials in 2013.
 
+### Minimax and Alpha-Beta Pruning
+
 The basic algorithm is minimax with alpha-beta pruning. The leaf node
 evaluation heuristic is simple - 2 points for a locked blue square, 1 point for
 unlocked blue, 0 for neutral, -1 for unlocked red, and -2 for locked red. I
 have yet to explore tweaking these parameters; they seem to work pretty well.
+
+### Ternary Search Trie
 
 Lettercrush stores the Letterpress dictionary in a ternary search trie, which
 uses much less memory than a standard trie, and allows us to search for words
 by exploring possible paths in the tree checked against our available tiles,
 rather than vice-versa: this turned out to yield an incredible performance
 boost. Two birds with one data structure.
+
+### Iterative Deepening and Narrowing
 
 I help the alpha-beta prune more branches with iterative deepening: Lettercrush
 does a heuristic evaluation of the full list of possible moves first,
@@ -62,6 +68,8 @@ the full n^d nodes (where n is the chosen list length) for a depth d
 evaluation, we take at most the same amount of time as our heuristic evaluation
 of all moves. In practice, with alpha-beta, this means that each successive
 iteration typically takes less time than the last. 
+
+### Speed/Timeout
 
 Still, exploring a game tree with a branching factor with 4 or 5 zeroes takes a
 long time. The Lettercrush web app allows the user to choose either a depth
